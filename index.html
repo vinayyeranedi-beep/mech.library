@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Mechanical Library — Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='52'>⚙️</text></svg>">
+<style>
+/* ═══════════════════════════════════════
+   CSS VARIABLES & RESET
+═══════════════════════════════════════ */
+:root{
+  --gold:#C9A84C;--gold2:#E8C97A;--gold3:#8B6914;--gold4:#F5D98B;
+  --crimson:#7B0D1E;--crimson2:#A61C2F;--clight:#B22222;
+  --navy:#050810;--navy2:#0A1020;--navy3:#111830;--navy4:#1A2545;
+  --navym:#1A2340;--navyl:#243050;
+  --cream:#F5ECD7;--parch:#EDE0C4;
+  --tgold:#D4B54C;--tcream:#F0E6D3;--tmuted:#8A7A5A;
+  --sgold:rgba(201,168,76,.3);--sdark:rgba(0,0,0,.7);
+  --sw:280px;--th:64px;
+  --rsm:6px;--rmd:10px;--rlg:14px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'EB Garamond',serif;background:var(--navy);color:var(--tcream);min-height:100vh;overflow-x:hidden;cursor:none}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:none}
+input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.28);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(201,168,76,.48)}
+
+/* ═══════════════════════════════════════
+   SHARED BACKGROUND ELEMENTS
+═══════════════════════════════════════ */
+.bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 20%,rgba(123,13,30,.18) 0%,transparent 50%),
+  radial-gradient(ellipse at 80% 80%,rgba(201,168,76,.12) 0%,transparent 50%),
+  linear-gradient(160deg,#050810 0%,#0d1525 40%,#0a0e1a 100%)}
+.gear-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.gear-bg svg{position:absolute;opacity:.055;animation:spinGear linear infinite}
+.gear-bg .g1{width:420px;top:-80px;left:-100px;animation-duration:80s}
+.gear-bg .g2{width:280px;bottom:-60px;right:-40px;animation-duration:60s;animation-direction:reverse}
+.gear-bg .g3{width:180px;top:40%;right:5%;animation-duration:45s}
+.gear-bg .g4{width:120px;top:20%;left:5%;animation-duration:30s;animation-direction:reverse}
+@keyframes spinGear{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.border-top{position:fixed;top:0;left:0;right:0;height:3px;z-index:999;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--crimson),var(--gold),transparent)}
+.particles{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;
+  animation:floatUp linear infinite;box-shadow:0 0 4px var(--gold)}
+@keyframes floatUp{0%{transform:translateY(100vh) translateX(0) scale(0);opacity:0}10%{opacity:1}90%{opacity:.6}100%{transform:translateY(-20px) translateX(var(--drift,0px)) scale(1.5);opacity:0}}
+
+/* Royal frame */
+.royal-frame{position:fixed;inset:12px;z-index:2;pointer-events:none;
+  border:1px solid rgba(201,168,76,.18);border-radius:4px}
+.royal-frame::before{content:'';position:absolute;inset:4px;
+  border:1px solid rgba(201,168,76,.07);border-radius:2px}
+.corner-o{position:absolute;width:38px;height:38px}
+.corner-o.tl{top:-1px;left:-1px}
+.corner-o.tr{top:-1px;right:-1px;transform:scaleX(-1)}
+.corner-o.bl{bottom:-1px;left:-1px;transform:scaleY(-1)}
+.corner-o.br{bottom:-1px;right:-1px;transform:scale(-1)}
+
+/* Cursor */
+.c-ring{width:30px;height:30px;border:1.5px solid var(--gold);border-radius:50%;
+  position:fixed;transform:translate(-50%,-50%);pointer-events:none;z-index:9999;
+  transition:width .14s,height .14s,background .14s}
+.c-dot{width:5px;height:5px;background:var(--gold);border-radius:50%;
+  position:fixed;transform:translate(-50%,-50%);pointer-events:none;z-index:9999;
+  box-shadow:0 0 7px var(--gold)}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;right:28px;
+  background:linear-gradient(135deg,#111827,#1A2340);
+  border:1px solid rgba(201,168,76,.38);border-left:4px solid var(--gold);
+  border-radius:var(--rsm);padding:13px 18px;min-width:270px;
+  box-shadow:0 8px 30px var(--sdark);z-index:9000;
+  transform:translateX(120%);transition:transform .32s cubic-bezier(.175,.885,.32,1.275)}
+.toast.show{transform:translateX(0)}
+.toast.err{border-left-color:#EF9A9A}
+.toast-t{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:2px;color:var(--gold);margin-bottom:3px}
+.toast.err .toast-t{color:#EF9A9A}
+.toast-m{font-size:13px;color:var(--tcream)}
+
+/* ═══════════════════════════════════════
+   LOGIN PAGE
+═══════════════════════════════════════ */
+#loginPage{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 20px 40px;transition:opacity .5s,transform .5s}
+#loginPage.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+#loginCanvas{position:fixed;inset:0;width:100%!important;height:100%!important;z-index:0;pointer-events:none}
+
+.login-crest{text-align:center;margin-bottom:20px;animation:fadeD .7s ease both}
+@keyframes fadeD{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+.crest-icon{font-size:48px;display:block;margin-bottom:6px;animation:crownG 3s ease-in-out infinite}
+@keyframes crownG{0%,100%{filter:drop-shadow(0 0 8px rgba(201,168,76,.4))}50%{filter:drop-shadow(0 0 24px rgba(201,168,76,.85))}}
+.crest-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3.5px;color:rgba(201,168,76,.6);text-transform:uppercase}
+
+.flip-scene{width:440px;perspective:1100px;animation:scaleI .8s ease .2s both}
+@keyframes scaleI{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.flip-card{position:relative;width:100%;transform-style:preserve-3d;transition:transform .82s cubic-bezier(.645,.045,.355,1)}
+.flip-card.flipped{transform:rotateY(180deg)}
+
+.card-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:linear-gradient(150deg,rgba(8,13,28,.97),rgba(14,20,44,.97),rgba(6,9,20,.97));
+  border-radius:var(--rlg);padding:36px 42px 32px;
+  border:1px solid rgba(201,168,76,.22);position:relative;
+  box-shadow:0 24px 70px rgba(0,0,0,.75),0 0 50px rgba(201,168,76,.05),0 0 100px rgba(123,13,30,.08)}
+.card-face::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--clight),var(--gold),transparent);opacity:.65}
+.card-face::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent)}
+.card-back{position:absolute;top:0;left:0;width:100%;transform:rotateY(180deg);max-height:90vh;overflow-y:auto}
+
+.card-orn{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.orn-ln{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4))}
+.orn-ln.r{background:linear-gradient(90deg,rgba(201,168,76,.4),transparent)}
+.orn-tx{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:3px;color:rgba(201,168,76,.62);text-transform:uppercase;white-space:nowrap}
+
+.form-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;text-align:center;margin-bottom:4px;
+  background:linear-gradient(135deg,var(--cream),var(--gold2),var(--cream));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.form-sub{font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:var(--tmuted);text-align:center;margin-bottom:24px}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:2px;color:var(--gold3);text-transform:uppercase;margin-bottom:5px;transition:color .18s}
+.field:focus-within label{color:var(--gold)}
+.finp{position:relative}
+.fic{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.4;pointer-events:none;transition:opacity .18s;z-index:1}
+.field:focus-within .fic{opacity:1}
+.finp input,.finp select{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.16);border-radius:var(--rsm);
+  padding:11px 13px 11px 40px;color:var(--tcream);font-size:14px;outline:none;transition:all .22s;-webkit-appearance:none}
+.finp input:focus,.finp select:focus{border-color:rgba(201,168,76,.55);background:rgba(201,168,76,.05);box-shadow:0 0 0 2px rgba(201,168,76,.07)}
+.finp input::placeholder{color:rgba(240,230,211,.22);font-style:italic}
+.finp select option{background:#0a1020;color:var(--tcream)}
+.peye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:none;font-size:14px;opacity:.35;color:var(--gold);transition:opacity .18s;padding:0}
+.peye:hover{opacity:1}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgt{text-align:right;margin:-8px 0 12px}
+.fgt a{font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--tmuted);font-style:italic;cursor:none;transition:color .18s}
+.fgt a:hover{color:var(--gold)}
+.ckrow{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.ckrow input[type=checkbox]{width:14px;height:14px;accent-color:var(--gold);cursor:none;flex-shrink:0;margin-top:2px}
+.ckrow label{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--tmuted);cursor:none;font-style:italic;line-height:1.4}
+.ckrow label a{color:var(--gold)}
+.str-bar{height:2.5px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:5px;overflow:hidden}
+.str-fill{height:100%;width:0;border-radius:2px;transition:all .3s}
+.str-lbl{font-family:'Cormorant Garamond',serif;font-size:10px;font-style:italic;float:right}
+.royal-btn{width:100%;padding:14px;border:none;border-radius:var(--rsm);cursor:none;
+  background:linear-gradient(135deg,var(--gold3) 0%,var(--gold) 40%,var(--gold2) 60%,var(--gold) 80%,var(--gold3) 100%);
+  background-size:200% 100%;
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:2.5px;color:var(--navy);text-transform:uppercase;
+  position:relative;overflow:hidden;transition:all .3s;box-shadow:0 3px 18px var(--sgold);margin-top:6px}
+.royal-btn:hover{background-position:100% 0;box-shadow:0 5px 28px rgba(201,168,76,.48);transform:translateY(-1px)}
+.royal-btn:active{transform:translateY(1px)}
+.royal-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:translateX(-100%);transition:transform .4s}
+.royal-btn:hover::before{transform:translateX(100%)}
+.btn-ldg{display:none;align-items:center;justify-content:center;gap:4px}
+.btn-ldg span{width:5px;height:5px;background:var(--navy);border-radius:50%;animation:ldot .75s ease infinite}
+.btn-ldg span:nth-child(2){animation-delay:.2s}
+.btn-ldg span:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+.fdiv{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
+.fdiv::before,.fdiv::after{content:'';flex:1;height:1px;background:rgba(201,168,76,.12)}
+.fdiv span{font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--tmuted);font-style:italic}
+.soc-row{display:flex;gap:10px;margin-top:12px}
+.soc-btn{flex:1;padding:10px;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.13);border-radius:var(--rsm);cursor:none;font-size:12px;color:var(--tmuted);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s}
+.soc-btn:hover{background:rgba(201,168,76,.07);border-color:rgba(201,168,76,.3);color:var(--tcream)}
+.sw-link{text-align:center;margin-top:18px;font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--tmuted)}
+.sw-link a{color:var(--gold);border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:1px;font-style:italic;cursor:none;transition:all .18s}
+.sw-link a:hover{color:var(--gold2);border-color:var(--gold2)}
+.login-foot{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:rgba(201,168,76,.28);text-transform:uppercase;white-space:nowrap;z-index:105}
+.succ-over{position:fixed;inset:0;z-index:200;background:rgba(5,8,16,0);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background .5s}
+.succ-over.on{background:rgba(5,8,16,.93);pointer-events:all}
+.succ-box{text-align:center;transform:scale(.8);opacity:0;transition:all .5s cubic-bezier(.175,.885,.32,1.275)}
+.succ-over.on .succ-box{transform:scale(1);opacity:1}
+.succ-ico{font-size:60px;display:block;margin-bottom:14px;animation:suPulse 1s ease infinite}
+@keyframes suPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.succ-t{font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gold);margin-bottom:8px}
+.succ-s{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--tmuted)}
+
+/* ═══════════════════════════════════════
+   DASHBOARD / APP
+═══════════════════════════════════════ */
+#appPage{display:none;min-height:100vh}
+#appPage.show{display:flex}
+.app{position:relative;z-index:1;display:flex;min-height:100vh;width:100%}
+
+/* Sidebar */
+.sidebar{width:var(--sw);min-height:100vh;
+  background:linear-gradient(180deg,rgba(10,14,26,.97),rgba(17,24,39,.97));
+  border-right:1px solid rgba(201,168,76,.28);
+  display:flex;flex-direction:column;
+  position:fixed;left:0;top:0;bottom:0;z-index:50;
+  box-shadow:4px 0 30px rgba(0,0,0,.45);overflow-y:auto}
+.sb-hdr{padding:28px 20px 20px;border-bottom:1px solid rgba(201,168,76,.18);text-align:center}
+.lib-crest{width:70px;height:70px;background:linear-gradient(135deg,var(--gold3),var(--gold),var(--gold2));
+  border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;
+  font-size:30px;box-shadow:0 0 20px var(--sgold),inset 0 1px 0 rgba(255,255,255,.2);position:relative}
+.lib-crest::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(201,168,76,.38)}
+.lib-tit{font-family:'Cinzel',serif;font-size:12.5px;font-weight:700;letter-spacing:1.8px;color:var(--gold);text-transform:uppercase;line-height:1.45}
+.lib-sub{font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--tmuted);letter-spacing:1px;margin-top:4px}
+.nav-sec{padding:14px 0}
+.nav-lbl{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:3px;color:var(--gold3);text-transform:uppercase;padding:0 20px 7px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:none;transition:all .18s;border-left:3px solid transparent;font-size:15px;color:var(--tmuted)}
+.nav-item:hover{background:rgba(201,168,76,.07);color:var(--gold2);border-left-color:rgba(201,168,76,.35)}
+.nav-item.active{background:linear-gradient(90deg,rgba(201,168,76,.15),transparent);color:var(--gold);border-left-color:var(--gold)}
+.nav-ic{font-size:18px;width:24px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--crimson);color:#fff;font-family:'Cinzel',serif;font-size:10px;padding:2px 7px;border-radius:10px}
+.nav-badge.gold{background:var(--gold);color:var(--navy)}
+.user-card{margin:12px 16px;padding:12px 14px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.18);border-radius:var(--rsm);cursor:none;display:flex;align-items:center;gap:10px;transition:all .18s}
+.user-card:hover{background:rgba(201,168,76,.1)}
+.u-av{width:36px;height:36px;background:linear-gradient(135deg,var(--gold3),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--navy);flex-shrink:0}
+.u-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold)}
+.u-role{font-size:11px;color:var(--tmuted);margin-top:2px;font-style:italic}
+.sb-foot{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(201,168,76,.12);text-align:center}
+.logout-btn{width:100%;padding:9px;background:none;border:1px solid rgba(178,34,34,.3);border-radius:var(--rsm);cursor:none;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:1.5px;color:rgba(239,154,154,.7);text-transform:uppercase;transition:all .18s}
+.logout-btn:hover{background:rgba(178,34,34,.1);color:#EF9A9A;border-color:rgba(178,34,34,.5)}
+
+/* Main */
+.main{margin-left:var(--sw);flex:1}
+.topbar{background:linear-gradient(90deg,rgba(10,14,26,.95),rgba(17,24,39,.95));border-bottom:1px solid rgba(201,168,76,.22);padding:0 36px;height:var(--th);display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px);position:sticky;top:0;z-index:40}
+.pg-head{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cream);display:flex;align-items:center;gap:12px}
+.pg-head .pgi{color:var(--gold);font-size:18px}
+.pg-head small{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--tmuted);font-weight:400;display:block;margin-top:1px}
+.tb-right{display:flex;align-items:center;gap:14px}
+.srch-bar{display:flex;align-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:7px 14px;gap:8px}
+.srch-bar input{background:none;border:none;outline:none;color:var(--tcream);font-size:13.5px;width:190px}
+.srch-bar input::placeholder{color:var(--tmuted)}
+.srch-bar span{color:var(--tmuted);font-size:13px}
+.tb-btn{background:linear-gradient(135deg,var(--gold3),var(--gold));color:var(--navy);border:none;cursor:none;font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:1px;padding:9px 18px;border-radius:var(--rsm);font-weight:700;transition:all .18s;box-shadow:0 2px 12px var(--sgold)}
+.tb-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--sgold)}
+.notif-bell{position:relative;cursor:none;font-size:20px;color:var(--tmuted);transition:color .18s}
+.notif-bell:hover{color:var(--gold)}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--clight);border-radius:50%;border:2px solid #111830}
+
+/* Content */
+.content{padding:28px 36px}
+.section{display:none;animation:secFade .28s ease}
+.section.active{display:block}
+@keyframes secFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sec-tit{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--cream);margin-bottom:5px}
+.sec-tit em{color:var(--gold);font-style:normal}
+.sec-dsc{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--tmuted);font-style:italic;margin-bottom:22px}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.stat-card{background:linear-gradient(135deg,rgba(26,35,64,.8),rgba(17,24,39,.9));border:1px solid rgba(201,168,76,.18);border-radius:var(--rmd);padding:20px 18px;position:relative;overflow:hidden;transition:all .28s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .28s}
+.stat-card:hover{border-color:rgba(201,168,76,.38);transform:translateY(-2px)}
+.stat-card:hover::before{opacity:1}
+.stat-ic{font-size:26px;margin-bottom:10px;display:block}
+.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--gold);line-height:1}
+.stat-lbl{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:2px;color:var(--tmuted);text-transform:uppercase;margin-top:5px}
+.stat-chg{font-size:11.5px;color:#81C784;margin-top:8px}
+.stat-chg.dn{color:var(--clight)}
+
+/* Panels */
+.panel{background:linear-gradient(135deg,rgba(17,24,39,.9),rgba(26,35,64,.8));border:1px solid rgba(201,168,76,.18);border-radius:var(--rmd);padding:20px}
+.panel-tit{font-family:'Playfair Display',serif;font-size:15px;color:var(--cream);margin-bottom:16px;padding-bottom:11px;border-bottom:1px solid rgba(201,168,76,.11);display:flex;align-items:center;gap:8px}
+.panel-tit .pi{color:var(--gold)}
+.dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;margin-top:22px}
+
+/* Tables */
+.tbl-wrap{background:linear-gradient(135deg,rgba(17,24,39,.9),rgba(26,35,64,.8));border:1px solid rgba(201,168,76,.18);border-radius:var(--rmd);overflow:hidden;margin-bottom:26px}
+.tbl-hdr{padding:16px 22px;border-bottom:1px solid rgba(201,168,76,.12);display:flex;align-items:center;justify-content:space-between}
+.tbl-hdr-t{font-family:'Playfair Display',serif;font-size:15.5px;color:var(--cream)}
+.tbl-hdr-t span{color:var(--gold)}
+.tbl-acts{display:flex;gap:8px}
+.rtbl{width:100%;border-collapse:collapse}
+.rtbl thead tr{background:linear-gradient(90deg,rgba(201,168,76,.1),rgba(201,168,76,.05))}
+.rtbl th{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;padding:12px 22px;text-align:left;border-bottom:1px solid rgba(201,168,76,.18)}
+.rtbl tbody tr{border-bottom:1px solid rgba(255,255,255,.035);transition:background .18s}
+.rtbl tbody tr:hover{background:rgba(201,168,76,.045)}
+.rtbl td{padding:12px 22px;font-size:13.5px;color:var(--tcream)}
+
+/* Badges */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.ba{background:rgba(76,175,80,.14);color:#81C784;border:1px solid rgba(76,175,80,.28)}
+.bi{background:rgba(201,168,76,.14);color:var(--gold);border:1px solid rgba(201,168,76,.28)}
+.bo{background:rgba(139,26,26,.18);color:#EF9A9A;border:1px solid rgba(139,26,26,.38)}
+.br2{background:rgba(100,100,200,.14);color:#9FA8DA;border:1px solid rgba(100,100,200,.28)}
+.bm{background:rgba(201,168,76,.09);color:var(--gold2);border:1px solid rgba(201,168,76,.18)}
+
+/* Action btns */
+.ab{background:none;border:1px solid rgba(201,168,76,.28);color:var(--gold);cursor:none;padding:5px 11px;border-radius:var(--rsm);font-size:12px;transition:all .18s;margin-right:4px}
+.ab:hover{background:rgba(201,168,76,.1)}
+.ab.d{border-color:rgba(178,34,34,.38);color:#EF9A9A}
+.ab.d:hover{background:rgba(178,34,34,.1)}
+.ab.p{background:linear-gradient(135deg,var(--gold3),var(--gold));color:var(--navy);border:none;font-weight:700}
+
+/* Filter chips */
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.fc{border:1px solid rgba(201,168,76,.18);border-radius:20px;padding:5px 14px;font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:1px;color:var(--tmuted);cursor:none;transition:all .18s}
+.fc:hover,.fc.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.07)}
+
+/* Activity */
+.act-item{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.035)}
+.act-item:last-child{border-bottom:none}
+.a-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.dg{background:#4CAF50;box-shadow:0 0 6px rgba(76,175,80,.4)}
+.dgo{background:var(--gold);box-shadow:0 0 6px var(--sgold)}
+.dr{background:var(--clight);box-shadow:0 0 6px rgba(178,34,34,.4)}
+.db{background:#5C6BC0;box-shadow:0 0 6px rgba(92,107,192,.4)}
+.a-txt{font-size:13px;color:var(--tcream);line-height:1.45}
+.a-tm{font-size:11px;color:var(--tmuted);margin-top:2px;font-style:italic}
+
+/* Category bars */
+.cat-bar{margin-bottom:12px}
+.cat-lbl{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:1px;color:var(--tmuted);margin-bottom:4px;display:flex;justify-content:space-between}
+.cat-trk{background:rgba(255,255,255,.06);border-radius:4px;height:9px;overflow:hidden}
+.cat-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold3),var(--gold2))}
+.cf2{background:linear-gradient(90deg,var(--crimson),#E57373)}
+.cf3{background:linear-gradient(90deg,#3949AB,#7986CB)}
+.cf4{background:linear-gradient(90deg,#2E7D32,#66BB6A)}
+
+/* Due items */
+.due-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.035)}
+.due-item:last-child{border-bottom:none}
+.due-bk{font-size:13px;color:var(--tcream)}
+.due-u{font-size:11px;color:var(--tmuted);margin-top:2px;font-style:italic}
+
+/* Members */
+.mem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mem-card{background:linear-gradient(135deg,rgba(26,35,64,.8),rgba(17,24,39,.9));border:1px solid rgba(201,168,76,.16);border-radius:var(--rmd);padding:18px;text-align:center;transition:all .28s}
+.mem-card:hover{border-color:rgba(201,168,76,.38);transform:translateY(-2px)}
+.m-av{width:50px;height:50px;background:linear-gradient(135deg,var(--gold3),var(--gold));border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy);box-shadow:0 0 12px var(--sgold)}
+.m-nm{font-family:'Playfair Display',serif;font-size:14px;color:var(--cream)}
+.m-rl{font-size:11.5px;color:var(--tmuted);margin:3px 0;font-style:italic}
+.m-stats{display:flex;gap:12px;justify-content:center;margin-top:10px}
+.ms2{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:1px;color:var(--tmuted);text-align:center}
+.ms2 strong{display:block;font-size:15px;color:var(--gold);font-weight:700}
+
+/* Reports */
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rep-card{background:linear-gradient(135deg,rgba(26,35,64,.8),rgba(17,24,39,.9));border:1px solid rgba(201,168,76,.16);border-radius:var(--rmd);padding:18px;cursor:none;transition:all .28s;display:flex;align-items:center;gap:14px}
+.rep-card:hover{border-color:var(--gold);transform:translateY(-2px);background:rgba(201,168,76,.05)}
+.rep-ic{font-size:26px;width:44px;text-align:center}
+.rep-tit{font-family:'Playfair Display',serif;font-size:14px;color:var(--cream)}
+.rep-dsc{font-size:11.5px;color:var(--tmuted);margin-top:3px;font-style:italic}
+
+/* Settings */
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.set-panel{background:linear-gradient(135deg,rgba(17,24,39,.9),rgba(26,35,64,.8));border:1px solid rgba(201,168,76,.18);border-radius:var(--rmd);padding:22px}
+.set-panel.full{grid-column:1/-1}
+.sp-tit{font-family:'Playfair Display',serif;font-size:15px;color:var(--cream);margin-bottom:18px;padding-bottom:11px;border-bottom:1px solid rgba(201,168,76,.11);display:flex;align-items:center;gap:8px}
+.sp-tit span{color:var(--gold)}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fg label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+.fg input,.fg select,.fg textarea{background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none;transition:border-color .18s;-webkit-appearance:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.09)}
+.fg select option{background:#111827}
+.fg textarea{resize:vertical;min-height:75px}
+.tgl-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.035)}
+.tgl-lbl{font-size:13.5px;color:var(--tcream)}
+.tgl-dsc{font-size:11.5px;color:var(--tmuted);margin-top:2px;font-style:italic}
+.tgl{width:42px;height:23px;background:rgba(255,255,255,.1);border-radius:12px;cursor:none;position:relative;transition:background .3s;border:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.tgl.on{background:var(--gold3);border-color:var(--gold)}
+.tgl::after{content:'';position:absolute;width:17px;height:17px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .3s}
+.tgl.on::after{left:20px}
+
+/* Modals */
+.modal-ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(5,8,16,.84);backdrop-filter:blur(5px);align-items:center;justify-content:center}
+.modal-ov.open{display:flex;animation:secFade .2s ease}
+.modal{background:linear-gradient(135deg,#111827,#1A2340);border:1px solid rgba(201,168,76,.32);border-radius:var(--rlg);padding:34px 40px 30px;width:530px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px var(--sdark),0 0 40px rgba(201,168,76,.06);animation:modalIn .25s ease}
+@keyframes modalIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.modal::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.modal-tit{font-family:'Playfair Display',serif;font-size:21px;color:var(--cream);margin-bottom:5px}
+.modal-sub{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--tmuted);margin-bottom:26px;font-style:italic}
+.modal-cls{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--tmuted);font-size:21px;cursor:none;transition:color .18s}
+.modal-cls:hover{color:var(--gold)}
+.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.f-grid .full{grid-column:1/-1}
+.m-acts{margin-top:22px;display:flex;gap:12px;justify-content:flex-end}
+.btn-cx{background:none;border:1px solid rgba(255,255,255,.14);color:var(--tmuted);cursor:none;padding:10px 22px;border-radius:var(--rsm);font-size:13.5px;transition:all .18s}
+.btn-cx:hover{border-color:rgba(255,255,255,.3);color:var(--tcream)}
+.btn-sub{background:linear-gradient(135deg,var(--gold3),var(--gold));color:var(--navy);border:none;cursor:none;padding:10px 26px;border-radius:var(--rsm);font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:1.5px;font-weight:700;transition:all .18s;box-shadow:0 2px 12px var(--sgold)}
+.btn-sub:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--sgold)}
+
+/* Fine calc */
+.fine-res{background:linear-gradient(135deg,rgba(139,26,26,.18),rgba(26,35,64,.5));border:1px solid rgba(178,34,34,.28);border-radius:var(--rsm);padding:15px 18px;margin-top:14px;display:none}
+.fine-res.show{display:block}
+.fine-amt{font-family:'Playfair Display',serif;font-size:26px;color:#EF9A9A}
+.fine-amt span{font-size:13px;color:var(--tmuted)}
+
+/* Gold divider */
+.gold-div{display:flex;align-items:center;gap:12px;margin:24px 0}
+.gold-div::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.3))}
+.gold-div::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,.3),transparent)}
+.gold-div span{color:var(--gold);font-size:14px}
+
+/* Responsive */
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-grid{grid-template-columns:1fr}
+  .set-grid{grid-template-columns:1fr}
+  .mem-grid{grid-template-columns:1fr 1fr}
+  .rep-grid{grid-template-columns:1fr}
+}
+@media(max-width:800px){
+  .sidebar{transform:translateX(-100%);transition:transform .28s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .content{padding:20px 18px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SHARED BG ═══════════════ -->
+<div class="bg-layer"></div>
+<div class="gear-bg" aria-hidden="true">
+  <svg class="g1" viewBox="0 0 200 200" fill="none"><path fill="#C9A84C" d="M100 20l8 20h-16l8-20zm0 140l8 20h-16l8-20zM20 100l-20 8v-16l20 8zm140 0l20 8v-16l-20 8zm-97-78l17 7-8 14-9-21zm54 0l9 21-8-14 17-7-18 0zm-97 97l-21 9 7-17 14 8zm140 0l14-8 7 17-21-9z"/><circle cx="100" cy="100" r="45" stroke="#C9A84C" stroke-width="3" fill="none"/><circle cx="100" cy="100" r="25" stroke="#C9A84C" stroke-width="2" fill="none"/><circle cx="100" cy="100" r="10" fill="#C9A84C"/></svg>
+  <svg class="g2" viewBox="0 0 200 200" fill="none"><path fill="#C9A84C" d="M100 20l8 20h-16l8-20zm0 140l8 20h-16l8-20zM20 100l-20 8v-16l20 8zm140 0l20 8v-16l-20 8z"/><circle cx="100" cy="100" r="55" stroke="#C9A84C" stroke-width="4" fill="none"/><circle cx="100" cy="100" r="30" stroke="#C9A84C" stroke-width="2" fill="none"/><circle cx="100" cy="100" r="12" fill="#C9A84C"/></svg>
+  <svg class="g3" viewBox="0 0 200 200" fill="none"><path fill="#C9A84C" d="M100 30l6 15h-12l6-15zm0 125l6 15h-12l6-15zM30 100l-15 6v-12l15 6zm125 0l15 6v-12l-15 6z"/><circle cx="100" cy="100" r="40" stroke="#C9A84C" stroke-width="3" fill="none"/><circle cx="100" cy="100" r="18" stroke="#C9A84C" stroke-width="2" fill="none"/></svg>
+  <svg class="g4" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="60" stroke="#C9A84C" stroke-width="3" fill="none"/><circle cx="100" cy="100" r="30" stroke="#C9A84C" stroke-width="2" fill="none"/><circle cx="100" cy="100" r="10" fill="#C9A84C"/></svg>
+</div>
+<div class="border-top"></div>
+<div class="particles" id="particles"></div>
+<div class="royal-frame" aria-hidden="true">
+  <svg class="corner-o tl" viewBox="0 0 38 38" fill="none"><path d="M2 36V7A5 5 0 017 2h29" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.4" fill="#C9A84C" opacity=".45"/><path d="M2 19h9M19 2v9" stroke="#C9A84C" stroke-width=".7" opacity=".35"/></svg>
+  <svg class="corner-o tr" viewBox="0 0 38 38" fill="none"><path d="M2 36V7A5 5 0 017 2h29" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.4" fill="#C9A84C" opacity=".45"/><path d="M2 19h9M19 2v9" stroke="#C9A84C" stroke-width=".7" opacity=".35"/></svg>
+  <svg class="corner-o bl" viewBox="0 0 38 38" fill="none"><path d="M2 36V7A5 5 0 017 2h29" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.4" fill="#C9A84C" opacity=".45"/><path d="M2 19h9M19 2v9" stroke="#C9A84C" stroke-width=".7" opacity=".35"/></svg>
+  <svg class="corner-o br" viewBox="0 0 38 38" fill="none"><path d="M2 36V7A5 5 0 017 2h29" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="2.4" fill="#C9A84C" opacity=".45"/><path d="M2 19h9M19 2v9" stroke="#C9A84C" stroke-width=".7" opacity=".35"/></svg>
+</div>
+<div class="c-ring" id="cring"></div>
+<div class="c-dot"  id="cdot"></div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toastEl">
+  <div class="toast-t" id="toastT">Notice</div>
+  <div class="toast-m" id="toastM"></div>
+</div>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<canvas id="loginCanvas"></canvas>
+<div id="loginPage">
+  <div class="login-crest">
+    <span class="crest-icon">⚙️</span>
+    <div class="crest-lbl">Mechanical Dept · Royal Library</div>
+  </div>
+
+  <div class="flip-scene">
+    <div class="flip-card" id="flipCard">
+
+      <!-- LOGIN FACE -->
+      <div class="card-face">
+        <div class="card-orn"><div class="orn-ln"></div><span class="orn-tx">⚙ Est. MMXXIV ⚙</span><div class="orn-ln r"></div></div>
+        <div class="form-title">Welcome Back</div>
+        <div class="form-sub">Enter thy credentials to access the Royal Vault</div>
+        <div class="field">
+          <label>Roll Number or Email</label>
+          <div class="finp"><span class="fic">📜</span><input type="text" id="loginId" placeholder="e.g. 21ME045 or name@uni.edu"></div>
+        </div>
+        <div class="field">
+          <label>Secret Passphrase</label>
+          <div class="finp"><span class="fic">🔐</span><input type="password" id="loginPw" placeholder="Enter your password"><button class="peye" onclick="togglePass('loginPw',this)">👁</button></div>
+        </div>
+        <div class="fgt"><a onclick="showToast('Reset','A reset link will be sent to your email.')">Forgot thy passphrase?</a></div>
+        <div class="ckrow"><input type="checkbox" id="rem"><label for="rem">Remember me upon this device</label></div>
+        <button class="royal-btn" id="lBtn" onclick="doLogin()">
+          <span class="btn-tx">⚔ Enter the Royal Library ⚔</span>
+          <span class="btn-ldg" id="lLd"><span></span><span></span><span></span></span>
+        </button>
+        <div class="fdiv"><span>or continue with</span></div>
+        <div class="soc-row">
+          <button class="soc-btn" onclick="showToast('Coming Soon','Google Sign-In available soon.')">🔵 Google</button>
+          <button class="soc-btn" onclick="showToast('Coming Soon','GitHub Sign-In available soon.')">⚙️ GitHub</button>
+        </div>
+        <div class="sw-link">Not yet a member? <a onclick="flipCard()">Register here →</a></div>
+      </div>
+
+      <!-- REGISTER FACE -->
+      <div class="card-face card-back">
+        <div class="card-orn"><div class="orn-ln"></div><span class="orn-tx">⚙ Join the Guild ⚙</span><div class="orn-ln r"></div></div>
+        <div class="form-title">Register</div>
+        <div class="form-sub">Begin thy scholarly journey at the Royal Library</div>
+        <div class="frow">
+          <div class="field"><label>First Name</label><div class="finp"><span class="fic">👤</span><input type="text" id="rFn" placeholder="First name"></div></div>
+          <div class="field"><label>Last Name</label><div class="finp"><span class="fic">👤</span><input type="text" id="rLn" placeholder="Last name"></div></div>
+        </div>
+        <div class="field"><label>Roll No / Employee ID</label><div class="finp"><span class="fic">🆔</span><input type="text" id="rRoll" placeholder="e.g. 21ME045"></div></div>
+        <div class="field"><label>Email Address</label><div class="finp"><span class="fic">📧</span><input type="email" id="rEmail" placeholder="university email address"></div></div>
+        <div class="frow">
+          <div class="field"><label>Member Type</label><div class="finp"><span class="fic">🎓</span><select id="rType" onchange="toggleAdminKey(this.value)"><option value="">Select role</option><option value="Student — B.Tech">Student — B.Tech</option><option value="Student — M.Tech">Student — M.Tech</option><option value="Student — PhD">Student — PhD</option><option value="Faculty">Faculty</option><option value="Staff">Staff</option><option value="Librarian">📚 Librarian</option><option value="Admin">👑 Admin</option></select></div></div>
+          <div class="field"><label>Year</label><div class="finp"><span class="fic">📅</span><select><option value="">Select year</option><option>I Year</option><option>II Year</option><option>III Year</option><option>IV Year</option><option>PG/PhD</option><option>Faculty/Staff</option></select></div></div>
+        </div>
+        <div class="field"><label>Phone</label><div class="finp"><span class="fic">📱</span><input type="tel" placeholder="+91 9XXXXXXXXX"></div></div>
+        <div class="field" id="adminKeyField" style="display:none">
+          <label style="color:#EF9A9A;letter-spacing:2px">🔑 Admin / Librarian Secret Key</label>
+          <div class="finp">
+            <span class="fic">🗝️</span>
+            <input type="password" id="rAdminKey" placeholder="Enter secret key provided by institution">
+            <button class="peye" onclick="togglePass('rAdminKey',this)">👁</button>
+          </div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:11px;font-style:italic;color:rgba(239,154,154,.6);margin-top:4px">⚠ This key is provided only by the Head Librarian or Institution Admin</div>
+        </div>
+        <div class="field">
+          <label>Passphrase <span class="str-lbl" id="strLbl"></span></label>
+          <div class="finp"><span class="fic">🔐</span><input type="password" id="rPw" placeholder="Min. 8 characters" oninput="chkStr(this.value)"><button class="peye" onclick="togglePass('rPw',this)">👁</button></div>
+          <div class="str-bar"><div class="str-fill" id="strFill"></div></div>
+        </div>
+        <div class="field"><label>Confirm Passphrase</label><div class="finp"><span class="fic">🔏</span><input type="password" id="rPwC" placeholder="Re-enter password"><button class="peye" onclick="togglePass('rPwC',this)">👁</button></div></div>
+        <div class="ckrow" style="margin-bottom:4px"><input type="checkbox" id="trms"><label for="trms">I agree to the <a style="color:var(--gold)">Royal Library Terms</a> &amp; <a style="color:var(--gold)">Code of Conduct</a></label></div>
+        <div class="ckrow" style="margin-bottom:16px"><input type="checkbox" id="news" checked><label for="news">Receive new arrival &amp; event notifications</label></div>
+        <button class="royal-btn" id="rBtn" onclick="doRegister()">
+          <span class="btn-tx">⚜ Register to the Guild ⚜</span>
+          <span class="btn-ldg" id="rLd"><span></span><span></span><span></span></span>
+        </button>
+        <div class="sw-link">Already a member? <a onclick="flipCard()">← Sign in here</a></div>
+      </div>
+    </div>
+  </div>
+  <div class="login-foot">⚙ Mechanical Engineering Department · Royal Knowledge Repository · Est. MMXXIV ⚙</div>
+</div>
+
+<!-- Success overlay -->
+<div class="succ-over" id="succOv">
+  <div class="succ-box">
+    <span class="succ-ico">👑</span>
+    <div class="succ-t" id="succT">Access Granted</div>
+    <div class="succ-s" id="succS">Welcome to the Royal Mechanical Library</div>
+  </div>
+</div>
+
+<!-- ═══════════════ DASHBOARD APP ═══════════════ -->
+<div id="appPage">
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-hdr">
+    <div class="lib-crest">⚙️</div>
+    <div class="lib-tit">Mechanical Dept.<br>Library</div>
+    <div class="lib-sub">Royal Knowledge Repository</div>
+  </div>
+  <div class="user-card" id="userCard">
+    <div class="u-av" id="userAv">A</div>
+    <div><div class="u-name" id="userName">Admin</div><div class="u-role" id="userRole">Librarian</div></div>
+  </div>
+  <nav>
+    <div class="nav-sec">
+      <div class="nav-lbl">Main</div>
+      <div class="nav-item active" onclick="nav('dashboard',this)"><span class="nav-ic">🏛️</span>Dashboard</div>
+      <div class="nav-item" onclick="nav('books',this)"><span class="nav-ic">📚</span>Book Catalog<span class="nav-badge">284</span></div>
+      <div class="nav-item" onclick="nav('issue',this)"><span class="nav-ic">📤</span>Issue &amp; Return<span class="nav-badge gold">5</span></div>
+      <div class="nav-item" onclick="nav('members',this)"><span class="nav-ic">👤</span>Members</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-lbl">Management</div>
+      <div class="nav-item" onclick="nav('fines',this)"><span class="nav-ic">⚖️</span>Fine Calculator</div>
+      <div class="nav-item" onclick="nav('reservations',this)"><span class="nav-ic">🔖</span>Reservations</div>
+      <div class="nav-item" onclick="nav('reports',this)"><span class="nav-ic">📊</span>Reports</div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-lbl">System</div>
+      <div class="nav-item" onclick="nav('settings',this)"><span class="nav-ic">⚙️</span>Settings</div>
+    </div>
+  </nav>
+  <div class="sb-foot">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--tmuted);margin-bottom:10px">Academic Year 2025–26</div>
+    <button class="logout-btn" onclick="doLogout()">⚔ Sign Out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="pg-head" id="pgHead"><span class="pgi">🏛️</span><div>Royal Dashboard<small>Welcome to the Mechanical Engineering Library System</small></div></div>
+    <div class="tb-right">
+      <div class="srch-bar"><span>🔍</span><input type="text" placeholder="Search books, members..." id="gSearch" oninput="globalSearch()"></div>
+      <div class="notif-bell">🔔<div class="notif-dot"></div></div>
+      <button class="tb-btn" onclick="openModal('addBookMod')">+ ADD BOOK</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="sec-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-ic">📚</span><div class="stat-num">284</div><div class="stat-lbl">Total Books</div><div class="stat-chg">↑ 12 this semester</div></div>
+        <div class="stat-card"><span class="stat-ic">📤</span><div class="stat-num">47</div><div class="stat-lbl">Books Issued</div><div class="stat-chg">↑ 8 this week</div></div>
+        <div class="stat-card"><span class="stat-ic">⚠️</span><div class="stat-num">9</div><div class="stat-lbl">Overdue Books</div><div class="stat-chg dn">↑ 2 new today</div></div>
+        <div class="stat-card"><span class="stat-ic">👤</span><div class="stat-num">132</div><div class="stat-lbl">Active Members</div><div class="stat-chg">↑ 18 this month</div></div>
+      </div>
+      <div class="dash-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-tit"><span class="pi">⚡</span>Recent Activity</div>
+            <div class="act-item"><div class="a-dot dg"></div><div><div class="a-txt">Ravi Kumar issued <em>"Theory of Machines"</em> — Rattan &amp; Ashok</div><div class="a-tm">10 minutes ago</div></div></div>
+            <div class="act-item"><div class="a-dot dgo"></div><div><div class="a-txt">Priya Sharma returned <em>"Fluid Mechanics"</em> — R.K. Bansal</div><div class="a-tm">45 minutes ago</div></div></div>
+            <div class="act-item"><div class="a-dot dr"></div><div><div class="a-txt">Overdue notice sent to Arjun Mehta for <em>"Engineering Thermodynamics"</em></div><div class="a-tm">2 hours ago</div></div></div>
+            <div class="act-item"><div class="a-dot db"></div><div><div class="a-txt">New book added: <em>"Advanced Strength of Materials"</em></div><div class="a-tm">Yesterday, 3:15 PM</div></div></div>
+            <div class="act-item"><div class="a-dot dg"></div><div><div class="a-txt">Sunita Rao reserved <em>"Machine Design"</em> — Shigley</div><div class="a-tm">Yesterday, 11:40 AM</div></div></div>
+            <div class="act-item"><div class="a-dot dgo"></div><div><div class="a-txt">Fine of ₹40 collected from Deepak Singh</div><div class="a-tm">2 days ago</div></div></div>
+          </div>
+          <div class="panel" style="margin-top:20px">
+            <div class="panel-tit"><span class="pi">📊</span>Books by Category</div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Thermodynamics &amp; Heat Transfer</span><span>58</span></div><div class="cat-trk"><div class="cat-fill" style="width:82%"></div></div></div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Theory of Machines</span><span>45</span></div><div class="cat-trk"><div class="cat-fill" style="width:64%"></div></div></div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Fluid Mechanics</span><span>42</span></div><div class="cat-trk"><div class="cat-fill cf2" style="width:60%"></div></div></div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Strength of Materials</span><span>38</span></div><div class="cat-trk"><div class="cat-fill cf3" style="width:54%"></div></div></div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Machine Design</span><span>35</span></div><div class="cat-trk"><div class="cat-fill cf4" style="width:50%"></div></div></div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Manufacturing Engineering</span><span>28</span></div><div class="cat-trk"><div class="cat-fill" style="width:40%"></div></div></div>
+            <div class="cat-bar"><div class="cat-lbl"><span>Engineering Mathematics</span><span>22</span></div><div class="cat-trk"><div class="cat-fill cf2" style="width:31%"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-tit"><span class="pi">⏰</span>Due Today</div>
+            <div class="due-item"><div><div class="due-bk">Engineering Thermodynamics</div><div class="due-u">Arjun Mehta · 19ME045</div></div><span class="badge bo">Overdue</span></div>
+            <div class="due-item"><div><div class="due-bk">Fluid Mechanics Vol.2</div><div class="due-u">Kavya Reddy · 20ME082</div></div><span class="badge bi">Due Today</span></div>
+            <div class="due-item"><div><div class="due-bk">Theory of Machines</div><div class="due-u">Sanjay Iyer · 21ME017</div></div><span class="badge bi">Due Today</span></div>
+            <div class="due-item"><div><div class="due-bk">Strength of Materials</div><div class="due-u">Pooja Nair · 21ME033</div></div><span class="badge bi">Due Today</span></div>
+          </div>
+          <div class="panel" style="margin-top:20px">
+            <div class="panel-tit"><span class="pi">⚡</span>Quick Actions</div>
+            <button class="tb-btn" style="width:100%;margin-bottom:10px;border-radius:var(--rsm);padding:12px" onclick="nav('issue',null)">📤 ISSUE A BOOK</button>
+            <button style="width:100%;margin-bottom:10px;padding:12px;background:linear-gradient(135deg,#1A2340,#243050);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:var(--rsm);font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:1px;font-weight:700;cursor:none;transition:all .18s" onclick="nav('issue',null)">📥 RETURN A BOOK</button>
+            <button style="width:100%;margin-bottom:10px;padding:12px;background:linear-gradient(135deg,#1A2340,#243050);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:var(--rsm);font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:1px;font-weight:700;cursor:none;transition:all .18s" onclick="nav('fines',null)">⚖️ CALCULATE FINE</button>
+            <button style="width:100%;padding:12px;background:linear-gradient(135deg,#1A2340,#243050);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:var(--rsm);font-family:'Cinzel',serif;font-size:10.5px;letter-spacing:1px;font-weight:700;cursor:none;transition:all .18s" onclick="openModal('addMemMod')">👤 ADD MEMBER</button>
+          </div>
+          <div class="panel" style="margin-top:20px">
+            <div class="panel-tit"><span class="pi">📌</span>Library Stats</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tmuted)">Total Books</span><strong style="color:var(--gold)">284</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tmuted)">Available</span><strong style="color:#81C784">237</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tmuted)">Issued</span><strong style="color:var(--gold)">47</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tmuted)">Overdue</span><strong style="color:#EF9A9A">9</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tmuted)">Reserved</span><strong style="color:#9FA8DA">7</strong></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--tmuted)">Fines (Month)</span><strong style="color:#EF9A9A">₹1,280</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKS -->
+    <div class="section" id="sec-books">
+      <div class="sec-tit">Book <em>Catalog</em></div>
+      <div class="sec-dsc">Complete collection of Mechanical Engineering texts &amp; references</div>
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="srch-bar" style="flex:1;min-width:220px"><span>🔍</span><input type="text" placeholder="Search title, author, ISBN..." oninput="filterBooks(this.value)" style="width:100%"></div>
+        <select onchange="filterCat(this.value)" style="background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:8px 14px;color:var(--tcream);font-size:13.5px;outline:none;-webkit-appearance:none">
+          <option value="">All Categories</option><option>Thermodynamics</option><option>Theory of Machines</option><option>Fluid Mechanics</option><option>Strength of Materials</option><option>Machine Design</option><option>Manufacturing</option><option>Engineering Maths</option><option>CAD/CAM</option>
+        </select>
+        <div class="filter-bar" style="margin:0">
+          <div class="fc active" onclick="filterSt('all',this)">All</div>
+          <div class="fc" onclick="filterSt('available',this)">Available</div>
+          <div class="fc" onclick="filterSt('issued',this)">Issued</div>
+          <div class="fc" onclick="filterSt('overdue',this)">Overdue</div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-hdr"><div class="tbl-hdr-t">All Books <span id="bkCount">(284)</span></div><div class="tbl-acts"><button class="ab p" onclick="openModal('addBookMod')">+ Add Book</button></div></div>
+        <table class="rtbl"><thead><tr><th>Book</th><th>Author</th><th>ISBN</th><th>Category</th><th>Copies</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="bkTbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ISSUE & RETURN -->
+    <div class="section" id="sec-issue">
+      <div class="sec-tit">Issue &amp; <em>Return</em></div>
+      <div class="sec-dsc">Manage book lending transactions</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:26px">
+        <div class="panel">
+          <div class="panel-tit"><span class="pi">📤</span>Issue a Book</div>
+          <div class="fg" style="margin-bottom:12px"><label>Member Roll No</label><input type="text" placeholder="e.g. 21ME045"></div>
+          <div class="fg" style="margin-bottom:12px"><label>Book ISBN / Title</label><input type="text" placeholder="Search book..."></div>
+          <div class="fg" style="margin-bottom:12px"><label>Issue Date</label><input type="date" id="issDate"></div>
+          <div class="fg" style="margin-bottom:16px"><label>Return Due Date</label><input type="date" id="dueDate"></div>
+          <button class="tb-btn" style="width:100%;padding:12px;border-radius:var(--rsm)" onclick="showToast('Book Issued','Book successfully issued to member')">📤 ISSUE BOOK</button>
+        </div>
+        <div class="panel">
+          <div class="panel-tit"><span class="pi">📥</span>Return a Book</div>
+          <div class="fg" style="margin-bottom:12px"><label>Transaction ID / ISBN</label><input type="text" placeholder="e.g. TXN-2024-0047"></div>
+          <div class="fg" style="margin-bottom:12px"><label>Return Date</label><input type="date" id="retDate"></div>
+          <div class="fg" style="margin-bottom:16px"><label>Condition of Book</label><select style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option>Good — No damage</option><option>Fair — Minor wear</option><option>Damaged</option><option>Lost</option></select></div>
+          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.18);border-radius:var(--rsm);padding:12px;margin-bottom:14px;font-size:13px;color:var(--tmuted);font-style:italic">Enter transaction details to preview fine amount</div>
+          <button style="width:100%;padding:12px;background:linear-gradient(135deg,#1A3A1A,#2E7D32);color:#fff;border:none;border-radius:var(--rsm);font-family:'Cinzel',serif;font-size:10.5px;font-weight:700;letter-spacing:1px;cursor:none;transition:all .18s" onclick="showToast('Book Returned','Return processed successfully')">📥 PROCESS RETURN</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-hdr"><div class="tbl-hdr-t">Currently <span>Issued Books</span></div><div class="tbl-acts"><button class="ab">Export CSV</button></div></div>
+        <table class="rtbl"><thead><tr><th>Txn ID</th><th>Book Title</th><th>Member</th><th>Issued</th><th>Due Date</th><th>Status</th><th>Fine</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:monospace;font-size:12px;color:var(--gold)">TXN-2024-0039</td><td>Theory of Machines</td><td>Ravi Kumar · 21ME031</td><td>01 Dec 2024</td><td>15 Dec 2024</td><td><span class="badge bo">Overdue</span></td><td style="color:#EF9A9A">₹80</td><td><button class="ab p" onclick="showToast('Returned','Book returned successfully')">Return</button></td></tr>
+          <tr><td style="font-family:monospace;font-size:12px;color:var(--gold)">TXN-2024-0041</td><td>Engineering Thermodynamics</td><td>Priya Sharma · 20ME052</td><td>05 Dec 2024</td><td>19 Dec 2024</td><td><span class="badge bi">Active</span></td><td style="color:var(--tmuted)">—</td><td><button class="ab p" onclick="showToast('Returned','Book returned successfully')">Return</button></td></tr>
+          <tr><td style="font-family:monospace;font-size:12px;color:var(--gold)">TXN-2024-0043</td><td>Fluid Mechanics Vol 2</td><td>Arjun Mehta · 19ME045</td><td>06 Dec 2024</td><td>20 Dec 2024</td><td><span class="badge bi">Active</span></td><td style="color:var(--tmuted)">—</td><td><button class="ab p" onclick="showToast('Returned','Book returned successfully')">Return</button></td></tr>
+          <tr><td style="font-family:monospace;font-size:12px;color:var(--gold)">TXN-2024-0047</td><td>Machine Design</td><td>Kavya Reddy · 20ME082</td><td>08 Dec 2024</td><td>22 Dec 2024</td><td><span class="badge bi">Active</span></td><td style="color:var(--tmuted)">—</td><td><button class="ab p" onclick="showToast('Returned','Book returned successfully')">Return</button></td></tr>
+          <tr><td style="font-family:monospace;font-size:12px;color:var(--gold)">TXN-2024-0048</td><td>Strength of Materials</td><td>Deepak Singh · 22ME007</td><td>09 Dec 2024</td><td>23 Dec 2024</td><td><span class="badge bi">Active</span></td><td style="color:var(--tmuted)">—</td><td><button class="ab p" onclick="showToast('Returned','Book returned successfully')">Return</button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="section" id="sec-members">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+        <div><div class="sec-tit">Library <em>Members</em></div><div class="sec-dsc" style="margin-bottom:0">Students &amp; faculty registered in the library</div></div>
+        <button class="tb-btn" onclick="openModal('addMemMod')">+ ADD MEMBER</button>
+      </div>
+      <div class="filter-bar" style="margin-bottom:18px">
+        <div class="fc active">All Members</div><div class="fc">Students</div><div class="fc">Faculty</div><div class="fc">With Issues</div><div class="fc">With Fines</div>
+      </div>
+      <div class="mem-grid">
+        <div class="mem-card"><div class="m-av">R</div><div class="m-nm">Ravi Kumar</div><div class="m-rl">21ME031 · B.Tech III Year</div><span class="badge ba" style="margin-top:6px">Active</span><div class="m-stats"><div class="ms2"><strong>3</strong>Issued</div><div class="ms2"><strong>12</strong>Total</div><div class="ms2"><strong style="color:#EF9A9A">₹80</strong>Fine</div></div></div>
+        <div class="mem-card"><div class="m-av">P</div><div class="m-nm">Priya Sharma</div><div class="m-rl">20ME052 · B.Tech IV Year</div><span class="badge ba" style="margin-top:6px">Active</span><div class="m-stats"><div class="ms2"><strong>1</strong>Issued</div><div class="ms2"><strong>8</strong>Total</div><div class="ms2"><strong>₹0</strong>Fine</div></div></div>
+        <div class="mem-card"><div class="m-av">A</div><div class="m-nm">Arjun Mehta</div><div class="m-rl">19ME045 · B.Tech Final</div><span class="badge bo" style="margin-top:6px">Fine Pending</span><div class="m-stats"><div class="ms2"><strong>2</strong>Issued</div><div class="ms2"><strong>22</strong>Total</div><div class="ms2"><strong style="color:#EF9A9A">₹160</strong>Fine</div></div></div>
+        <div class="mem-card"><div class="m-av">K</div><div class="m-nm">Kavya Reddy</div><div class="m-rl">20ME082 · B.Tech IV Year</div><span class="badge ba" style="margin-top:6px">Active</span><div class="m-stats"><div class="ms2"><strong>1</strong>Issued</div><div class="ms2"><strong>5</strong>Total</div><div class="ms2"><strong>₹0</strong>Fine</div></div></div>
+        <div class="mem-card"><div class="m-av" style="background:linear-gradient(135deg,#7B0D1E,#A61C2F)">Dr</div><div class="m-nm">Dr. S. Ramaswamy</div><div class="m-rl">Faculty · Thermodynamics</div><span class="badge bm" style="margin-top:6px">Faculty</span><div class="m-stats"><div class="ms2"><strong>0</strong>Issued</div><div class="ms2"><strong>34</strong>Total</div><div class="ms2"><strong>₹0</strong>Fine</div></div></div>
+        <div class="mem-card"><div class="m-av">S</div><div class="m-nm">Sunita Rao</div><div class="m-rl">22ME019 · B.Tech II Year</div><span class="badge br2" style="margin-top:6px">Reserved</span><div class="m-stats"><div class="ms2"><strong>0</strong>Issued</div><div class="ms2"><strong>3</strong>Total</div><div class="ms2"><strong>₹0</strong>Fine</div></div></div>
+      </div>
+    </div>
+
+    <!-- FINES -->
+    <div class="section" id="sec-fines">
+      <div class="sec-tit">Fine <em>Calculator</em></div>
+      <div class="sec-dsc">Calculate and manage late return penalties</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div class="panel">
+          <div class="panel-tit"><span class="pi">⚖️</span>Calculate Fine</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="fg"><label>Due Date</label><input type="date" id="fineDue"></div>
+            <div class="fg"><label>Return Date</label><input type="date" id="fineRet"></div>
+            <div class="fg"><label>Book Type</label><select id="fineType" style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option value="1">Regular (₹1/day)</option><option value="2">Reference (₹2/day)</option><option value="5">Rare/Special (₹5/day)</option></select></div>
+            <div class="fg"><label>Damage Penalty</label><select id="fineDmg" style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option value="0">Good — No penalty</option><option value="100">Minor damage — ₹100</option><option value="300">Major damage — ₹300</option><option value="500">Lost — ₹500</option></select></div>
+          </div>
+          <button class="tb-btn" style="width:100%;padding:12px;margin-top:12px;border-radius:var(--rsm)" onclick="calcFine()">⚖️ CALCULATE FINE</button>
+          <div class="fine-res" id="fineRes">
+            <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--tmuted);margin-bottom:6px">FINE AMOUNT DUE</div>
+            <div class="fine-amt">₹ <span id="fineTot">0</span> <span>total</span></div>
+            <div style="margin-top:10px;font-size:13px;color:var(--tmuted)" id="fineBreak"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-tit"><span class="pi">📋</span>Fine Policy</div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+            <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:var(--rsm);padding:13px"><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:5px">REGULAR BOOKS</div><div>₹1 per day · Max 14 days loan</div></div>
+            <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:var(--rsm);padding:13px"><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:5px">REFERENCE BOOKS</div><div>₹2–5 per day · Max 7 days loan</div></div>
+            <div style="background:rgba(139,26,26,.1);border:1px solid rgba(139,26,26,.2);border-radius:var(--rsm);padding:13px"><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:#EF9A9A;margin-bottom:5px">DAMAGE / LOSS</div><div style="color:#EF9A9A">Penalty: ₹100 – ₹500</div></div>
+            <div style="background:rgba(26,35,64,.5);border:1px solid rgba(201,168,76,.1);border-radius:var(--rsm);padding:13px"><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:5px">FACULTY</div><div>30 days · ₹2/day overdue</div></div>
+          </div>
+        </div>
+        <div class="panel" style="grid-column:1/-1">
+          <div class="panel-tit"><span class="pi">💰</span>Outstanding Fines</div>
+          <table class="rtbl"><thead><tr><th>Member</th><th>Book</th><th>Days Overdue</th><th>Fine</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Ravi Kumar · 21ME031</td><td>Theory of Machines</td><td style="color:#EF9A9A">8 days</td><td style="color:#EF9A9A;font-size:16px">₹80</td><td><span class="badge bo">Unpaid</span></td><td><button class="ab p" onclick="showToast('Fine Collected','₹80 received from Ravi Kumar')">Collect</button></td></tr>
+            <tr><td>Arjun Mehta · 19ME045</td><td>Engineering Thermodynamics</td><td style="color:#EF9A9A">12 days</td><td style="color:#EF9A9A;font-size:16px">₹160</td><td><span class="badge bo">Unpaid</span></td><td><button class="ab p" onclick="showToast('Fine Collected','₹160 received from Arjun Mehta')">Collect</button></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESERVATIONS -->
+    <div class="section" id="sec-reservations">
+      <div class="sec-tit">Book <em>Reservations</em></div>
+      <div class="sec-dsc">Manage book hold requests and waiting list</div>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:22px">
+        <div class="panel">
+          <div class="panel-tit"><span class="pi">🔖</span>New Reservation</div>
+          <div class="fg" style="margin-bottom:12px"><label>Member ID</label><input type="text" placeholder="Roll No / Faculty ID"></div>
+          <div class="fg" style="margin-bottom:12px"><label>Book Title / ISBN</label><input type="text" placeholder="Search book..."></div>
+          <div class="fg" style="margin-bottom:16px"><label>Priority</label><select style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option>Normal</option><option>High</option><option>Faculty Priority</option></select></div>
+          <button class="tb-btn" style="width:100%;padding:12px;border-radius:var(--rsm)" onclick="showToast('Reserved','Book reserved successfully')">🔖 RESERVE BOOK</button>
+        </div>
+        <div class="tbl-wrap" style="margin:0">
+          <div class="tbl-hdr"><div class="tbl-hdr-t">Active <span>Reservations</span></div></div>
+          <table class="rtbl"><thead><tr><th>#</th><th>Book Title</th><th>Member</th><th>Reserved</th><th>Priority</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--gold)">01</td><td>Machine Design (Shigley)</td><td>Sunita Rao · 22ME019</td><td>08 Dec 2024</td><td><span class="badge bi">Normal</span></td><td><button class="ab d" onclick="showToast('Cancelled','Reservation removed')">Cancel</button></td></tr>
+            <tr><td style="color:var(--gold)">02</td><td>Thermodynamics (Cengel)</td><td>Harish Kumar · 21ME067</td><td>09 Dec 2024</td><td><span class="badge br2">High</span></td><td><button class="ab d" onclick="showToast('Cancelled','Reservation removed')">Cancel</button></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="section" id="sec-reports">
+      <div class="sec-tit">Library <em>Reports</em></div>
+      <div class="sec-dsc">Generate comprehensive reports for library administration</div>
+      <div class="rep-grid" style="margin-bottom:26px">
+        <div class="rep-card" onclick="showToast('Exported','Circulation report exported as PDF')"><div class="rep-ic">📄</div><div><div class="rep-tit">Circulation Report</div><div class="rep-dsc">All issue/return transactions for a date range</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Overdue report exported as PDF')"><div class="rep-ic">⚠️</div><div><div class="rep-tit">Overdue Books Report</div><div class="rep-dsc">All books past due with fine details</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Fine collection report exported')"><div class="rep-ic">💰</div><div><div class="rep-tit">Fine Collection Report</div><div class="rep-dsc">Monthly fine collection &amp; outstanding fines</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Inventory report exported')"><div class="rep-ic">📚</div><div><div class="rep-tit">Inventory Report</div><div class="rep-dsc">Complete catalog with availability status</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Member activity report exported')"><div class="rep-ic">👤</div><div><div class="rep-tit">Member Activity</div><div class="rep-dsc">Per-member borrowing history &amp; statistics</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Popular books report exported')"><div class="rep-ic">🏆</div><div><div class="rep-tit">Popular Books</div><div class="rep-dsc">Most borrowed books &amp; demand analysis</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Category analysis exported')"><div class="rep-ic">📊</div><div><div class="rep-tit">Category Analysis</div><div class="rep-dsc">Borrowing trends by subject category</div></div></div>
+        <div class="rep-card" onclick="showToast('Exported','Annual report exported')"><div class="rep-ic">📈</div><div><div class="rep-tit">Annual Statistical Report</div><div class="rep-dsc">Year-end comprehensive library statistics</div></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-tit"><span class="pi">📊</span>Top Borrowed This Month</div>
+        <table class="rtbl"><thead><tr><th>Rank</th><th>Book Title</th><th>Author</th><th>Category</th><th>Times Borrowed</th></tr></thead>
+        <tbody>
+          <tr><td style="font-size:18px">🥇</td><td>Theory of Machines</td><td>S.S. Rattan</td><td><span class="badge bm">Machines</span></td><td style="color:var(--gold)">18</td></tr>
+          <tr><td style="font-size:18px">🥈</td><td>Engineering Thermodynamics</td><td>P.K. Nag</td><td><span class="badge bm">Thermo</span></td><td style="color:var(--gold)">15</td></tr>
+          <tr><td style="font-size:18px">🥉</td><td>Fluid Mechanics</td><td>R.K. Bansal</td><td><span class="badge bm">Fluids</span></td><td style="color:var(--gold)">14</td></tr>
+          <tr><td>4</td><td>Strength of Materials</td><td>Sadhu Singh</td><td><span class="badge bm">SOM</span></td><td>11</td></tr>
+          <tr><td>5</td><td>Machine Design</td><td>Shigley &amp; Mischke</td><td><span class="badge bm">Design</span></td><td>9</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="sec-settings">
+      <div class="sec-tit">Library <em>Settings</em></div>
+      <div class="sec-dsc">Configure library policies, rules, and system preferences</div>
+      <div class="set-grid">
+        <div class="set-panel">
+          <div class="sp-tit"><span>⚙️</span>General Configuration</div>
+          <div class="fg"><label>Library Name</label><input type="text" value="Mechanical Engineering Department Library"></div>
+          <div class="fg"><label>Institution</label><input type="text" value="VIT University, Vellore"></div>
+          <div class="fg"><label>Academic Year</label><input type="text" value="2024–2025"></div>
+          <div class="fg"><label>Librarian Name</label><input type="text" value="Dr. K. Subramaniam"></div>
+          <div class="fg"><label>Contact Email</label><input type="email" value="library.mech@university.edu"></div>
+          <button class="btn-sub" onclick="showToast('Saved','General settings updated')">SAVE CHANGES</button>
+        </div>
+        <div class="set-panel">
+          <div class="sp-tit"><span>📋</span>Loan Policy</div>
+          <div class="fg"><label>Student Loan Period (days)</label><input type="number" value="14"></div>
+          <div class="fg"><label>Faculty Loan Period (days)</label><input type="number" value="30"></div>
+          <div class="fg"><label>Max Books per Student</label><input type="number" value="3"></div>
+          <div class="fg"><label>Max Books per Faculty</label><input type="number" value="10"></div>
+          <div class="fg"><label>Reference Book Loan (days)</label><input type="number" value="7"></div>
+          <div class="fg"><label>Renewal Allowed</label><select style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option>Yes — 1 renewal</option><option>Yes — 2 renewals</option><option>No renewals</option></select></div>
+          <button class="btn-sub" onclick="showToast('Saved','Loan policy updated')">SAVE POLICY</button>
+        </div>
+        <div class="set-panel">
+          <div class="sp-tit"><span>⚖️</span>Fine Configuration</div>
+          <div class="fg"><label>Regular Book Fine (₹/day)</label><input type="number" value="1"></div>
+          <div class="fg"><label>Reference Book Fine (₹/day)</label><input type="number" value="2"></div>
+          <div class="fg"><label>Rare Book Fine (₹/day)</label><input type="number" value="5"></div>
+          <div class="fg"><label>Minor Damage Penalty (₹)</label><input type="number" value="100"></div>
+          <div class="fg"><label>Major Damage Penalty (₹)</label><input type="number" value="300"></div>
+          <div class="fg"><label>Lost Book Penalty (₹)</label><input type="number" value="500"></div>
+          <button class="btn-sub" onclick="showToast('Saved','Fine configuration updated')">SAVE FINE SETTINGS</button>
+        </div>
+        <div class="set-panel">
+          <div class="sp-tit"><span>🔔</span>Notifications &amp; Features</div>
+          <div class="tgl-row"><div><div class="tgl-lbl">Email Notifications</div><div class="tgl-dsc">Send due date reminders via email</div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tgl-row"><div><div class="tgl-lbl">SMS Alerts</div><div class="tgl-dsc">Send SMS for overdue books</div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tgl-row"><div><div class="tgl-lbl">Auto Fine Calculation</div><div class="tgl-dsc">Calculate fines automatically on due date</div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tgl-row"><div><div class="tgl-lbl">Reservation System</div><div class="tgl-dsc">Allow students to reserve books</div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tgl-row"><div><div class="tgl-lbl">QR Code Scanning</div><div class="tgl-dsc">Enable QR barcode for check-in/out</div></div><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tgl-row"><div><div class="tgl-lbl">Multi-copy Tracking</div><div class="tgl-dsc">Track individual copies of same title</div></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="set-panel full">
+          <div class="sp-tit"><span>🕐</span>Library Hours</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            <div class="fg"><label>Mon–Fri Open</label><input type="time" value="08:00"></div>
+            <div class="fg"><label>Mon–Fri Close</label><input type="time" value="20:00"></div>
+            <div class="fg"><label>Saturday Open</label><input type="time" value="09:00"></div>
+            <div class="fg"><label>Saturday Close</label><input type="time" value="17:00"></div>
+          </div>
+          <div style="margin-top:16px"><button class="btn-sub" onclick="showToast('Saved','Library hours updated')">SAVE HOURS</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+</div><!-- /appPage -->
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+<div class="modal-ov" id="addBookMod">
+  <div class="modal">
+    <button class="modal-cls" onclick="closeModal('addBookMod')">✕</button>
+    <div class="modal-tit">Add New Book</div>
+    <div class="modal-sub">Register a new volume to the Mechanical Department Library</div>
+    <div class="f-grid">
+      <div class="fg full"><label>Book Title</label><input type="text" id="newBkTit" placeholder="e.g. Theory of Machines"></div>
+      <div class="fg"><label>Author(s)</label><input type="text" placeholder="e.g. S.S. Rattan"></div>
+      <div class="fg"><label>ISBN</label><input type="text" placeholder="13-digit ISBN"></div>
+      <div class="fg"><label>Publisher</label><input type="text" placeholder="Publisher name"></div>
+      <div class="fg"><label>Year</label><input type="number" placeholder="2024"></div>
+      <div class="fg"><label>Category</label><select style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option>Thermodynamics</option><option>Theory of Machines</option><option>Fluid Mechanics</option><option>Strength of Materials</option><option>Machine Design</option><option>Manufacturing</option><option>Engineering Maths</option><option>CAD/CAM</option><option>Robotics</option></select></div>
+      <div class="fg"><label>Copies</label><input type="number" placeholder="1" min="1"></div>
+      <div class="fg"><label>Rack Location</label><input type="text" placeholder="e.g. Rack-A, Shelf-3"></div>
+      <div class="fg"><label>Edition</label><input type="text" placeholder="e.g. 4th Edition"></div>
+      <div class="fg"><label>Book Type</label><select style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option>Regular</option><option>Reference</option><option>Rare/Special</option><option>Journal</option></select></div>
+      <div class="fg full"><label>Notes</label><textarea placeholder="Optional notes..."></textarea></div>
+    </div>
+    <div class="m-acts"><button class="btn-cx" onclick="closeModal('addBookMod')">Cancel</button><button class="btn-sub" onclick="addBook()">📚 ADD TO CATALOG</button></div>
+  </div>
+</div>
+
+<div class="modal-ov" id="addMemMod">
+  <div class="modal">
+    <button class="modal-cls" onclick="closeModal('addMemMod')">✕</button>
+    <div class="modal-tit">Register New Member</div>
+    <div class="modal-sub">Add a student or faculty member to the library system</div>
+    <div class="f-grid">
+      <div class="fg"><label>Full Name</label><input type="text" placeholder="Student / Faculty Name"></div>
+      <div class="fg"><label>Roll No / Employee ID</label><input type="text" placeholder="e.g. 22ME045"></div>
+      <div class="fg"><label>Member Type</label><select style="background:rgba(17,24,39,.9);border:1px solid rgba(201,168,76,.22);border-radius:var(--rsm);padding:10px 13px;color:var(--tcream);font-size:14px;outline:none"><option>Student — B.Tech</option><option>Student — M.Tech</option><option>Student — PhD</option><option>Faculty</option><option>Staff</option></select></div>
+      <div class="fg"><label>Year / Department</label><input type="text" placeholder="e.g. III Year / Mech Dept"></div>
+      <div class="fg"><label>Phone Number</label><input type="tel" placeholder="+91 9XXXXXXXXX"></div>
+      <div class="fg"><label>Email Address</label><input type="email" placeholder="student@university.edu"></div>
+      <div class="fg full"><label>Address</label><textarea placeholder="Hostel / Local address"></textarea></div>
+    </div>
+    <div class="m-acts"><button class="btn-cx" onclick="closeModal('addMemMod')">Cancel</button><button class="btn-sub" onclick="addMember()">👤 REGISTER MEMBER</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// ── Particles ──────────────────────────────────────────────────
+(function(){
+  const pc=document.getElementById('particles');
+  for(let i=0;i<28;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;bottom:-10px;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*8}s;--drift:${(Math.random()-.5)*80}px;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;opacity:${.3+Math.random()*.5}`;
+    pc.appendChild(p);
+  }
+})();
+
+// ── Custom cursor ──────────────────────────────────────────────
+(function(){
+  const ring=document.getElementById('cring'),dot=document.getElementById('cdot');
+  let rx=0,ry=0,dx=0,dy=0;
+  document.addEventListener('mousemove',e=>{dx=e.clientX;dy=e.clientY;dot.style.left=dx+'px';dot.style.top=dy+'px'});
+  (function loop(){rx+=(dx-rx)*.12;ry+=(dy-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop)})();
+  document.querySelectorAll('a,button,input,select,.nav-item,.rep-card,.mem-card,.stat-card,.tgl').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ring.style.width='44px';ring.style.height='44px';ring.style.background='rgba(201,168,76,.08)'});
+    el.addEventListener('mouseleave',()=>{ring.style.width='30px';ring.style.height='30px';ring.style.background='none'});
+  });
+})();
+
+// ── THREE.JS 3D LOGIN SCENE ─────────────────────────────────
+(function(){
+  const canvas=document.getElementById('loginCanvas');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setClearColor(0x000000,0);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,100);
+  cam.position.set(0,0,8);
+  scene.add(new THREE.AmbientLight(0xffffff,.18));
+  const gl=new THREE.PointLight(0xC9A84C,2.2,14);gl.position.set(3,3,3);scene.add(gl);
+  const cl=new THREE.PointLight(0x7B0D1E,1.5,10);cl.position.set(-3,-2,2);scene.add(cl);
+  const gM=new THREE.MeshStandardMaterial({color:0xC9A84C,metalness:1,roughness:.18,emissive:0x2A1500,emissiveIntensity:.3});
+  const bkC=[0x7B0D1E,0x1A3A1A,0x1A1A4A,0x3A1800,0x280A28,0x0A2838];
+  const bkG=new THREE.Group();scene.add(bkG);
+  const bkD=[{w:.38,h:1.3,d:.11,x:-5.8,y:.4,z:-2.2,rz:-.12,ci:0},{w:.44,h:1.45,d:.14,x:-5.1,y:.2,z:-2,rz:.04,ci:1},{w:.36,h:1.2,d:.09,x:-4.5,y:.35,z:-2.1,rz:-.06,ci:2},{w:.48,h:1.55,d:.16,x:4.6,y:.4,z:-2,rz:.09,ci:3},{w:.4,h:1.4,d:.12,x:5.2,y:.2,z:-2.1,rz:-.1,ci:4},{w:.34,h:1.15,d:.09,x:5.8,y:.35,z:-2,rz:.05,ci:5},{w:.75,h:1.05,d:.05,x:-1.6,y:2.2,z:-1.2,rx:.28,rz:.14,ci:1},{w:.75,h:1.05,d:.05,x:-.8,y:2.2,z:-1.2,rx:.28,rz:-.14,ci:3}];
+  const bks3D=[];
+  bkD.forEach((bd,i)=>{
+    const mat=new THREE.MeshStandardMaterial({color:bkC[bd.ci],metalness:.25,roughness:.75});
+    const m=new THREE.Mesh(new THREE.BoxGeometry(bd.w,bd.h,bd.d),mat);
+    m.position.set(bd.x,bd.y,bd.z);m.rotation.set(bd.rx||0,.2+i*.08,bd.rz||0);
+    const sp=new THREE.Mesh(new THREE.BoxGeometry(.01,bd.h*.93,bd.d*1.01),gM);sp.position.set(-bd.w/2+.005,0,0);m.add(sp);
+    const eG=new THREE.BoxGeometry(bd.w,.007,bd.d);
+    const tE=new THREE.Mesh(eG,gM);tE.position.set(0,bd.h/2-.004,0);m.add(tE);
+    const bE=new THREE.Mesh(eG,gM);bE.position.set(0,-bd.h/2+.004,0);m.add(bE);
+    bkG.add(m);bks3D.push({m,by:bd.y,sp:.3+Math.random()*.45,ph:Math.random()*Math.PI*2});
+  });
+  function mkGear(r,ti,th){
+    const sh=new THREE.Shape();
+    for(let i=0;i<ti;i++){const a=(i/ti)*Math.PI*2,a0=a-Math.PI/ti*.55,a1=a-Math.PI/ti*.25,a2=a+Math.PI/ti*.25,a3=a+Math.PI/ti*.55;sh[i===0?'moveTo':'lineTo'](Math.cos(a0)*r*.78,Math.sin(a0)*r*.78);sh.lineTo(Math.cos(a1)*r,Math.sin(a1)*r);sh.lineTo(Math.cos(a2)*r,Math.sin(a2)*r);sh.lineTo(Math.cos(a3)*r*.78,Math.sin(a3)*r*.78);}
+    sh.closePath();const hl=new THREE.Path();for(let j=0;j<=32;j++){const ha=(j/32)*Math.PI*2;hl[j===0?'moveTo':'lineTo'](Math.cos(ha)*r*.32,Math.sin(ha)*r*.32);}sh.holes.push(hl);
+    return new THREE.ExtrudeGeometry(sh,{depth:th,bevelEnabled:true,bevelThickness:.018,bevelSize:.018,bevelSegments:2});
+  }
+  const grM=new THREE.MeshStandardMaterial({color:0xC9A84C,metalness:.96,roughness:.1,emissive:0x1E0D00,emissiveIntensity:.32});
+  const grG=new THREE.Group();scene.add(grG);
+  const grD=[{r:.95,ti:12,t:.18,x:-6.5,y:3.2,z:-3,sm:1},{r:.55,ti:8,t:.14,x:-5.4,y:2.3,z:-3,sm:-1.85},{r:1.2,ti:16,t:.2,x:6.8,y:-1.8,z:-3,sm:.7},{r:.7,ti:10,t:.15,x:5.5,y:-.6,z:-3,sm:-1.3},{r:.4,ti:7,t:.12,x:6.1,y:.8,z:-3,sm:2.2}];
+  const grs3D=[];
+  grD.forEach(gd=>{const m=new THREE.Mesh(mkGear(gd.r,gd.ti,gd.t),grM);m.position.set(gd.x,gd.y,gd.z);m.rotation.x=Math.PI/2;grG.add(m);grs3D.push({m,sm:gd.sm});});
+  const bpM=new THREE.MeshBasicMaterial({color:0x4A7AFF,wireframe:true,transparent:true,opacity:.28});
+  const cylM=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,1.1,14,1,true),bpM);cylM.position.set(3.2,-3.2,-1.2);scene.add(cylM);
+  const pisM=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.28,14),new THREE.MeshBasicMaterial({color:0x6AAFFF,wireframe:true,transparent:true,opacity:.35}));pisM.position.set(0,.28,0);cylM.add(pisM);
+  const crkM=new THREE.Mesh(new THREE.TorusGeometry(.48,.055,8,20),new THREE.MeshBasicMaterial({color:0xC9A84C,wireframe:true,transparent:true,opacity:.32}));crkM.position.set(3.2,-4.3,-1.2);scene.add(crkM);
+  const beM=new THREE.MeshBasicMaterial({color:0x6AFF9A,wireframe:true,transparent:true,opacity:.3});
+  const bmM=new THREE.Mesh(new THREE.BoxGeometry(2.2,.1,.1),beM);bmM.position.set(-7.2,-1.8,-.6);scene.add(bmM);
+  const ppM=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,2.2,12,1,true),new THREE.MeshBasicMaterial({color:0x4ACFFF,wireframe:true,transparent:true,opacity:.25}));ppM.position.set(8.2,1.2,-1.2);ppM.rotation.z=Math.PI/2;scene.add(ppM);
+  const stG=new THREE.BufferGeometry();const stP=new Float32Array(260*3);for(let i=0;i<260;i++){stP[i*3]=(Math.random()-.5)*38;stP[i*3+1]=(Math.random()-.5)*28;stP[i*3+2]=-7-Math.random()*9;}stG.setAttribute('position',new THREE.BufferAttribute(stP,3));scene.add(new THREE.Points(stG,new THREE.PointsMaterial({color:0xC9A84C,size:.036,transparent:true,opacity:.45})));
+  let mx=0,my=0,tmx=0,tmy=0;
+  document.addEventListener('mousemove',e=>{tmx=(e.clientX/window.innerWidth-.5)*2;tmy=(e.clientY/window.innerHeight-.5)*2;});
+  let t=0,pp=0;
+  (function loop(){requestAnimationFrame(loop);t+=.007;pp+=.038;mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;
+    cam.position.x=mx*1.1;cam.position.y=-my*.75;cam.lookAt(0,0,0);
+    grs3D.forEach(g=>{g.m.rotation.z+=.005*g.sm});
+    bks3D.forEach(b=>{b.m.position.y=b.by+Math.sin(t*b.sp+b.ph)*.13;b.m.rotation.y=Math.sin(t*.28+b.ph)*.13});
+    gl.intensity=1.6+Math.sin(t*1.4)*.55;cl.intensity=1+Math.cos(t*.75)*.35;
+    pisM.position.y=.28+Math.sin(pp)*.32;crkM.rotation.x=pp;bmM.rotation.z=Math.sin(t*1.1)*.035;ppM.rotation.x+=.025;
+    renderer.render(scene,cam);
+  })();
+  window.addEventListener('resize',()=>{cam.aspect=window.innerWidth/window.innerHeight;cam.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+})();
+
+// ── BOOKS DATA ─────────────────────────────────────────────────
+const BOOKS=[
+  {title:'Theory of Machines',author:'S.S. Rattan & Ashok Gupta',isbn:'978-0070681248',cat:'Theory of Machines',copies:5,avail:3,status:'available',e:'⚙️'},
+  {title:'Engineering Thermodynamics',author:'P.K. Nag',isbn:'978-0070780163',cat:'Thermodynamics',copies:4,avail:2,status:'issued',e:'🔥'},
+  {title:'Fluid Mechanics',author:'R.K. Bansal',isbn:'978-8131808153',cat:'Fluid Mechanics',copies:6,avail:4,status:'available',e:'💧'},
+  {title:'Strength of Materials',author:'Sadhu Singh',isbn:'978-8172332075',cat:'Strength of Materials',copies:4,avail:3,status:'available',e:'🏗️'},
+  {title:'Machine Design',author:'Shigley & Mischke',isbn:'978-0073398204',cat:'Machine Design',copies:3,avail:0,status:'issued',e:'🔩'},
+  {title:'Manufacturing Engineering',author:'Kalpakjian',isbn:'978-0132092142',cat:'Manufacturing',copies:3,avail:2,status:'available',e:'🏭'},
+  {title:'Engineering Mathematics',author:'B.S. Grewal',isbn:'978-8121903455',cat:'Engineering Maths',copies:8,avail:5,status:'available',e:'📐'},
+  {title:'Heat Transfer',author:'J.P. Holman',isbn:'978-0072406559',cat:'Thermodynamics',copies:3,avail:1,status:'issued',e:'♨️'},
+  {title:'Mechanics of Materials',author:'Hibbeler',isbn:'978-0134081229',cat:'Strength of Materials',copies:4,avail:4,status:'available',e:'🔧'},
+  {title:'Internal Combustion Engines',author:'V. Ganesan',isbn:'978-0070677739',cat:'Thermodynamics',copies:2,avail:0,status:'overdue',e:'🚗'},
+  {title:'CAD/CAM Integration',author:'Ibrahim Zeid',isbn:'978-0070681873',cat:'CAD/CAM',copies:2,avail:2,status:'available',e:'💻'},
+  {title:'Robotics & Control',author:'Craig',isbn:'978-0201543612',cat:'Robotics',copies:2,avail:1,status:'reserved',e:'🤖'},
+  {title:'Engineering Drawing',author:'N.D. Bhatt',isbn:'978-9385676642',cat:'Engineering Maths',copies:6,avail:6,status:'available',e:'📏'},
+  {title:'Automobile Engineering',author:'R.B. Gupta',isbn:'978-8121917582',cat:'Manufacturing',copies:2,avail:2,status:'available',e:'🚙'},
+  {title:'Advanced Thermodynamics',author:'Wark & Richards',isbn:'978-0070682924',cat:'Thermodynamics',copies:2,avail:2,status:'available',e:'🌡️'},
+];
+const stMap={available:'ba',issued:'bi',overdue:'bo',reserved:'br2'};
+function renderBooks(data){
+  const tb=document.getElementById('bkTbody');
+  tb.innerHTML=data.map(b=>`<tr>
+    <td style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:46px;border-radius:2px;border:1px solid rgba(201,168,76,.18);display:flex;align-items:center;justify-content:center;font-size:17px;background:rgba(201,168,76,.06)">${b.e}</div><span>${b.title}</span></td>
+    <td style="color:var(--tmuted);font-style:italic">${b.author}</td>
+    <td style="font-family:monospace;font-size:12px;color:var(--tmuted)">${b.isbn}</td>
+    <td><span class="badge bm">${b.cat}</span></td>
+    <td style="text-align:center">${b.avail}/${b.copies}</td>
+    <td><span class="badge ${stMap[b.status]}">${b.status}</span></td>
+    <td>
+      <button class="ab" onclick="showToast('View','Viewing: ${b.title.replace(/'/g,"\\'")}')">View</button>
+      <button class="ab" onclick="showToast('Edited','${b.title.replace(/'/g,"\\'")} updated')">Edit</button>
+      <button class="ab d" onclick="showToast('Removed','Book removed from catalog')">Del</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('bkCount').textContent=`(${data.length})`;
+}
+function filterBooks(q){renderBooks(BOOKS.filter(b=>b.title.toLowerCase().includes(q.toLowerCase())||b.author.toLowerCase().includes(q.toLowerCase())||b.isbn.includes(q)))}
+function filterCat(c){renderBooks(c?BOOKS.filter(b=>b.cat.toLowerCase().includes(c.toLowerCase())):BOOKS)}
+function filterSt(s,el){document.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderBooks(s==='all'?BOOKS:BOOKS.filter(b=>b.status===s))}
+renderBooks(BOOKS);
+
+// ── NAVIGATION ────────────────────────────────────────────────
+const pgNames={
+  dashboard:{i:'🏛️',t:'Royal Dashboard',s:'Welcome to the Mechanical Engineering Library System'},
+  books:{i:'📚',t:'Book Catalog',s:'Manage all books in the department library'},
+  issue:{i:'📤',t:'Issue & Return',s:'Process book lending and returns'},
+  members:{i:'👤',t:'Members',s:'Manage library members and accounts'},
+  fines:{i:'⚖️',t:'Fine Calculator',s:'Calculate and collect overdue fines'},
+  reservations:{i:'🔖',t:'Reservations',s:'Manage book hold requests'},
+  reports:{i:'📊',t:'Reports',s:'Generate and export library reports'},
+  settings:{i:'⚙️',t:'Settings',s:'Configure library system preferences'},
+};
+function nav(page,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+page).classList.add('active');
+  if(el)el.classList.add('active');
+  const p=pgNames[page];
+  document.getElementById('pgHead').innerHTML=`<span class="pgi">${p.i}</span><div>${p.t}<small>${p.s}</small></div>`;
+}
+
+// ── GLOBAL SEARCH ─────────────────────────────────────────────
+function globalSearch(){const q=document.getElementById('gSearch').value;if(q.length>1){nav('books',null);filterBooks(q);}}
+
+// ── TOAST ──────────────────────────────────────────────────────
+let _tt;
+function showToast(title,msg,err){
+  const n=document.getElementById('toastEl');
+  document.getElementById('toastT').textContent=title.toUpperCase();
+  document.getElementById('toastM').textContent=msg;
+  n.className='toast'+(err?' err':'')+' show';
+  clearTimeout(_tt);_tt=setTimeout(()=>n.classList.remove('show'),3400);
+}
+
+// ── MODALS ─────────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+
+// ── MODAL ACTIONS ─────────────────────────────────────────────
+function addBook(){const t=document.getElementById('newBkTit').value||'New Book';closeModal('addBookMod');showToast('Book Added',`"${t}" added to catalog`)}
+function addMember(){closeModal('addMemMod');showToast('Member Registered','New member added to the system')}
+
+// ── FINE CALCULATOR ───────────────────────────────────────────
+function calcFine(){
+  const due=document.getElementById('fineDue').value,ret=document.getElementById('fineRet').value;
+  const rate=parseInt(document.getElementById('fineType').value),dmg=parseInt(document.getElementById('fineDmg').value);
+  if(!due||!ret){showToast('Error','Please select both dates',true);return;}
+  const days=Math.max(0,Math.floor((new Date(ret)-new Date(due))/(1000*60*60*24)));
+  const lateFine=days*rate,total=lateFine+dmg;
+  document.getElementById('fineTot').textContent=total;
+  document.getElementById('fineBreak').innerHTML=`<div>Late days: <strong style="color:var(--gold)">${days}</strong> × ₹${rate}/day = ₹${lateFine}</div>${dmg>0?`<div>Damage: <strong style="color:#EF9A9A">₹${dmg}</strong></div>`:''}<div style="margin-top:6px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold)">TOTAL: ₹${total}</div>`;
+  document.getElementById('fineRes').classList.add('show');
+}
+
+// ── LOGIN / REGISTER ──────────────────────────────────────────
+function flipCard(){document.getElementById('flipCard').classList.toggle('flipped')}
+function togglePass(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈'}else{i.type='password';btn.textContent='👁'}}
+function chkStr(v){
+  const f=document.getElementById('strFill'),l=document.getElementById('strLbl');
+  let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const cols=['#EF9A9A','#FF7043','#FFD54F','#81C784'],lbs=['Weak','Fair','Good','Strong'];
+  if(!v.length){f.style.width='0';l.textContent='';return;}
+  f.style.width=(s*25)+'%';f.style.background=cols[s-1]||cols[0];l.textContent=lbs[s-1]||'Weak';l.style.color=cols[s-1]||cols[0];
+}
+function setLoad(bId,ldId,on){const b=document.getElementById(bId),l=document.getElementById(ldId);b.querySelector('.btn-tx').style.display=on?'none':'';l.style.display=on?'flex':'none';b.disabled=on}
+function doLogin(){
+  const id=document.getElementById('loginId').value.trim(),pw=document.getElementById('loginPw').value;
+  if(!id){showToast('Error','Please enter your Roll No or Email',true);return}
+  if(!pw){showToast('Error','Please enter your passphrase',true);return}
+  setLoad('lBtn','lLd',true);
+  setTimeout(()=>{
+    setLoad('lBtn','lLd',false);
+    // Set user info in dashboard
+    const name=id.includes('@')?id.split('@')[0]:id;
+    document.getElementById('userAv').textContent=name[0].toUpperCase();
+    document.getElementById('userName').textContent=name;
+    document.getElementById('userRole').textContent='Library Member';
+    const succOv=document.getElementById('succOv');
+    document.getElementById('succT').textContent='Access Granted';
+    document.getElementById('succS').textContent=`Welcome back, ${name}!\nLoading your sanctum…`;
+    succOv.classList.add('on');
+    showToast('Access Granted','Welcome back, Scholar!');
+    setTimeout(()=>{
+      succOv.classList.remove('on');
+      document.getElementById('loginPage').classList.add('hide');
+      const ap=document.getElementById('appPage');ap.style.display='flex';
+      setTimeout(()=>ap.classList.add('show'),50);
+      // Set dates
+      const today=new Date().toISOString().split('T')[0];
+      const due2w=new Date(Date.now()+14*86400000).toISOString().split('T')[0];
+      ['issDate','dueDate','retDate'].forEach((d,i)=>{const el=document.getElementById(d);if(el)el.value=i===1?due2w:today});
+    },2000);
+  },1800);
+}
+function doRegister(){
+  const fn=document.getElementById('rFn').value.trim(),ln=document.getElementById('rLn').value.trim();
+  const rl=document.getElementById('rRoll').value.trim(),em=document.getElementById('rEmail').value.trim();
+  const tp=document.getElementById('rType').value,pw=document.getElementById('rPw').value,pc=document.getElementById('rPwC').value;
+  const tr=document.getElementById('trms').checked;
+  if(!fn||!ln){showToast('Error','Please enter your full name',true);return}
+  if(!rl){showToast('Error','Please enter your Roll Number',true);return}
+  if(!em||!em.includes('@')){showToast('Error','Please enter a valid email',true);return}
+  if(!tp){showToast('Error','Please select your member type',true);return}
+  if(pw.length<8){showToast('Error','Password must be at least 8 characters',true);return}
+  if(pw!==pc){showToast('Error','Passphrases do not match',true);return}
+  if(!tr){showToast('Error','Please accept the Terms & Code of Conduct',true);return}
+  setLoad('rBtn','rLd',true);
+  setTimeout(()=>{
+    setLoad('rBtn','rLd',false);
+    document.getElementById('userAv').textContent=fn[0].toUpperCase();
+    document.getElementById('userName').textContent=fn+' '+ln;
+    document.getElementById('userRole').textContent=tp||'Member';
+    const succOv=document.getElementById('succOv');
+    document.getElementById('succT').textContent='Guild Joined!';
+    document.getElementById('succS').textContent=`Welcome, ${fn} ${ln}!\nYour account is now active.`;
+    succOv.classList.add('on');
+    showToast('Registered!',`Welcome to the Guild, ${fn}!`);
+    setTimeout(()=>{
+      succOv.classList.remove('on');
+      document.getElementById('loginPage').classList.add('hide');
+      const ap=document.getElementById('appPage');ap.style.display='flex';
+      setTimeout(()=>ap.classList.add('show'),50);
+    },2000);
+  },1900);
+}
+function doLogout(){
+  document.getElementById('appPage').classList.remove('show');
+  document.getElementById('appPage').style.display='none';
+  document.getElementById('loginPage').classList.remove('hide');
+  document.getElementById('loginId').value='';
+  document.getElementById('loginPw').value='';
+  document.getElementById('flipCard').classList.remove('flipped');
+  showToast('Signed Out','You have been signed out successfully');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(!document.getElementById('flipCard').classList.contains('flipped'))doLogin();else doRegister()}});
+
+// ── Show/hide Admin Key field based on role ──
+window.toggleAdminKey = function(val){
+  const field = document.getElementById('adminKeyField');
+  field.style.display = (val==='Admin'||val==='Librarian') ? 'block' : 'none';
+  if(val!=='Admin'&&val!=='Librarian') document.getElementById('rAdminKey').value='';
+};
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     FIREBASE AUTH — REPLACE ONLY THE firebaseConfig VALUES
+     Get them from: Firebase Console → Project Settings → Your Apps
+═══════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, set, get }             from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+/* ─────────────────────────────────────────────────────────
+   🔥 ONLY CHANGE THESE VALUES — copy from Firebase Console
+───────────────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_AUTH_DOMAIN",
+  databaseURL:       "YOUR_DATABASE_URL",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId:             "YOUR_APP_ID"
+};
+/* ───────────────────────────────────────────────────────── */
+
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const db       = getDatabase(app);
+const googlePv = new GoogleAuthProvider();
+const githubPv = new GithubAuthProvider();
+
+/* ── Helper: show toast (reuse existing) ────────────────── */
+const T = (t,m,e) => window.showToast(t,m,e);
+
+/* ── Helper: enter dashboard after auth ─────────────────── */
+function enterDashboard(user, role='Member'){
+  const name = user.displayName || user.email.split('@')[0];
+  document.getElementById('userAv').textContent   = name[0].toUpperCase();
+  document.getElementById('userName').textContent = name;
+  document.getElementById('userRole').textContent = role;
+  const sov = document.getElementById('succOv');
+  document.getElementById('succT').textContent = 'Access Granted';
+  document.getElementById('succS').textContent = `Welcome, ${name}!`;
+  sov.classList.add('on');
+  setTimeout(()=>{
+    sov.classList.remove('on');
+    document.getElementById('loginPage').classList.add('hide');
+    const ap = document.getElementById('appPage');
+    ap.style.display = 'flex';
+    setTimeout(()=> ap.classList.add('show'), 50);
+    const today = new Date().toISOString().split('T')[0];
+    const due2w = new Date(Date.now()+14*86400000).toISOString().split('T')[0];
+    ['issDate','dueDate','retDate'].forEach((d,i)=>{
+      const el=document.getElementById(d); if(el) el.value = i===1?due2w:today;
+    });
+  }, 2000);
+}
+
+/* ── Helper: save user to Realtime DB ───────────────────── */
+async function saveUserToDB(user, extra={}){
+  await set(ref(db, `users/${user.uid}`), {
+    uid:       user.uid,
+    name:      user.displayName || extra.name || '',
+    email:     user.email,
+    roll:      extra.roll   || '',
+    type:      extra.type   || 'Student',
+    role:      extra.role   || 'member',
+    phone:     extra.phone  || '',
+    createdAt: Date.now()
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   EMAIL LOGIN  — replaces existing doLogin()
+══════════════════════════════════════════════════════════ */
+window.doLogin = async function(){
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  if(!id){ T('Error','Please enter your Roll No or Email',true); return; }
+  if(!pw){ T('Error','Please enter your passphrase',true); return; }
+
+  // Accept roll number by appending @library.edu (adjust domain to yours)
+  const email = id.includes('@') ? id : `${id}@library.edu`;
+
+  window.setLoad('lBtn','lLd',true);
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pw);
+    T('Access Granted','Welcome back, Scholar!');
+    enterDashboard(cred.user);
+  } catch(err){
+    window.setLoad('lBtn','lLd',false);
+    T('Login Failed', firebaseErrMsg(err.code), true);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   EMAIL REGISTER  — replaces existing doRegister()
+══════════════════════════════════════════════════════════ */
+window.doRegister = async function(){
+  const fn = document.getElementById('rFn').value.trim();
+  const ln = document.getElementById('rLn').value.trim();
+  const rl = document.getElementById('rRoll').value.trim();
+  const em = document.getElementById('rEmail').value.trim();
+  const tp = document.getElementById('rType').value;
+  const pw = document.getElementById('rPw').value;
+  const pc = document.getElementById('rPwC').value;
+  const tr = document.getElementById('trms').checked;
+
+  if(!fn||!ln){ T('Error','Please enter your full name',true); return; }
+  if(!rl)     { T('Error','Please enter your Roll Number',true); return; }
+  if(!em||!em.includes('@')){ T('Error','Please enter a valid email',true); return; }
+  if(!tp)     { T('Error','Please select your member type',true); return; }
+  if(pw.length<8){ T('Error','Password must be at least 8 characters',true); return; }
+  if(pw!==pc) { T('Error','Passphrases do not match',true); return; }
+  if(!tr)     { T('Error','Please accept the Terms & Code of Conduct',true); return; }
+
+  // ── Admin / Librarian secret key validation ──────────────
+  // 🔑 CHANGE THESE SECRET KEYS TO YOUR OWN VALUES
+  const ADMIN_KEY     = 'MECH_ADMIN_2024';      // 👑 Admin key
+  const LIBRARIAN_KEY = 'MECH_LIB_2024';        // 📚 Librarian key
+  if(tp === 'Admin' || tp === 'Librarian'){
+    const enteredKey = document.getElementById('rAdminKey').value.trim();
+    const expectedKey = tp === 'Admin' ? ADMIN_KEY : LIBRARIAN_KEY;
+    if(!enteredKey){ T('Error','Please enter the secret key for '+tp,true); return; }
+    if(enteredKey !== expectedKey){ T('Access Denied','Invalid secret key for '+tp+' role',true); return; }
+  }
+
+  window.setLoad('rBtn','rLd',true);
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, em, pw);
+    await updateProfile(cred.user, { displayName: `${fn} ${ln}` });
+    const roleMap = {'Admin':'admin','Librarian':'librarian','Faculty':'faculty','Staff':'staff'};
+    const assignedRole = roleMap[tp] || 'member';
+    await saveUserToDB(cred.user, { name:`${fn} ${ln}`, roll:rl, type:tp, phone:'', role:assignedRole });
+    T('Registered!',`Welcome to the Guild, ${fn}!`);
+    enterDashboard(cred.user, tp);
+  } catch(err){
+    window.setLoad('rBtn','rLd',false);
+    T('Registration Failed', firebaseErrMsg(err.code), true);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   GOOGLE LOGIN  — hooked to existing Google button
+══════════════════════════════════════════════════════════ */
+window.loginWithGoogle = async function(){
+  try {
+    const cred = await signInWithPopup(auth, googlePv);
+    const user = cred.user;
+    // Check if new user → save to DB
+    const snap = await get(ref(db, `users/${user.uid}`));
+    if(!snap.exists()) await saveUserToDB(user, { role:'member' });
+    T('Google Login','Welcome, '+user.displayName+'!');
+    enterDashboard(user);
+  } catch(err){
+    T('Google Failed', firebaseErrMsg(err.code), true);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   GITHUB LOGIN  — hooked to existing GitHub button
+══════════════════════════════════════════════════════════ */
+window.loginWithGithub = async function(){
+  try {
+    const cred = await signInWithPopup(auth, githubPv);
+    const user = cred.user;
+    const snap = await get(ref(db, `users/${user.uid}`));
+    if(!snap.exists()) await saveUserToDB(user, { role:'member' });
+    T('GitHub Login','Welcome, '+(user.displayName||user.email)+'!');
+    enterDashboard(user);
+  } catch(err){
+    T('GitHub Failed', firebaseErrMsg(err.code), true);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   LOGOUT  — replaces existing doLogout()
+══════════════════════════════════════════════════════════ */
+window.doLogout = async function(){
+  await signOut(auth);
+  document.getElementById('appPage').classList.remove('show');
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').classList.remove('hide');
+  document.getElementById('loginId').value = '';
+  document.getElementById('loginPw').value = '';
+  document.getElementById('flipCard').classList.remove('flipped');
+  T('Signed Out','You have been signed out successfully');
+};
+
+/* ── Auth state listener (auto-login if session exists) ── */
+onAuthStateChanged(auth, user => {
+  if(user){
+    enterDashboard(user);
+  }
+});
+
+/* ── Firebase error messages ─────────────────────────────── */
+function firebaseErrMsg(code){
+  const msgs = {
+    'auth/user-not-found':      'No account found with this email.',
+    'auth/wrong-password':      'Incorrect password. Try again.',
+    'auth/email-already-in-use':'This email is already registered.',
+    'auth/weak-password':       'Password must be at least 6 characters.',
+    'auth/invalid-email':       'Please enter a valid email address.',
+    'auth/popup-closed-by-user':'Login popup was closed. Try again.',
+    'auth/account-exists-with-different-credential': 'Account exists with a different login method.',
+    'auth/cancelled-popup-request': 'Only one popup allowed at a time.',
+    'auth/network-request-failed':'Network error. Check your connection.',
+  };
+  return msgs[code] || 'Something went wrong. Please try again.';
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     UPDATE BUTTON ONCLICK — patch Google & GitHub buttons
+     Find these 2 lines in your HTML and change onclick to:
+     Google button  → onclick="loginWithGoogle()"
+     GitHub button  → onclick="loginWithGithub()"
+═══════════════════════════════════════════════════════ -->
+<script>
+// Auto-patch Google & GitHub buttons without touching HTML
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.soc-btn').forEach(btn => {
+    if(btn.textContent.includes('Google')) btn.onclick = ()=> window.loginWithGoogle();
+    if(btn.textContent.includes('GitHub')) btn.onclick = ()=> window.loginWithGithub();
+  });
+});
+</script>
+
+</body>
+</html>
